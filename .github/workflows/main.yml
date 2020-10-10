@@ -18,4 +18,4 @@ jobs:
           cd server/
           npm ci
       - name: starting tests
-        run: npm run tests
+        run: npm run test
