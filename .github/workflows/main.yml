@@ -1,0 +1,19 @@
+name: Test server
+
+on:
+  push:
+    branches: [ develop, feature/*, refactor/*, bugfix/*, hotfix/* ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install dependencies
+        run: npm ci
+      - name: starting tests
+        run: npm run tests
