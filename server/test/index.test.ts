@@ -1,5 +1,6 @@
+import 'reflect-metadata';
 import { expect } from 'chai';
-import { hello } from 'index';
+import { hello } from 'controllers/UserController';
 
 describe('example test suite', () => {
   it('example test', () => {
