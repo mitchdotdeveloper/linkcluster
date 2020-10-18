@@ -1,7 +1,3 @@
-# docker-compose up --build -d
-
-# docker-compose down
-
 # docker exec -it database /bin/bash
 
 version: '3'
