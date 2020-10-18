@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
+import { describe, before, after, test } from 'mocha';
 import { expect } from 'chai';
 import db from 'connect';
-import { test } from 'mocha';
 import { UserDTO } from 'models/UserModel';
 import { QueryResult } from 'pg';
 import 'reflect-metadata';
