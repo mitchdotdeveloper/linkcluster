@@ -1,22 +1,24 @@
 /* eslint-disable no-unused-expressions */
-import { describe, before, after, test } from 'mocha';
+import 'reflect-metadata';
 import { expect } from 'chai';
 import db from 'connect';
+import container from 'inversify.config';
+import TYPES from 'inversifyTypes';
+import { after, before, describe, test } from 'mocha';
 import { UserDTO } from 'models/UserModel';
 import { QueryResult } from 'pg';
-import 'reflect-metadata';
-import {
-  UserRepository,
-  UserRepositoryImpl,
-} from 'repositories/UserRepository';
-import sinon from 'sinon';
-
-const userRepository: UserRepository = new UserRepositoryImpl();
-
-const queryStub = sinon.stub(db, 'query');
+import { UserRepository } from 'repositories/UserRepository';
+import { stub } from 'sinon';
 
 describe('UserRepository Suite', () => {
-  before(async () => {
+  const userRepository: UserRepository = container.get<UserRepository>(
+    TYPES.UserRepository
+  );
+
+  const queryStub = stub(db, 'query');
+
+  before(() => {
+    // successful query
     queryStub
       .withArgs('SELECT username FROM users WHERE username = $1;', [
         'usernameExists',
@@ -26,27 +28,27 @@ describe('UserRepository Suite', () => {
         rowCount: 1,
       });
 
+    // unsuccessful query
     queryStub
       .withArgs('SELECT username FROM users WHERE username = $1;', [
         'usernameDoesNotExist',
       ])
-      .resolves(<QueryResult>{
+      .resolves(<QueryResult<never>>{
+        rows: [],
         rowCount: 0,
       });
   });
-
   after(() => {
-    queryStub.resetBehavior();
+    queryStub.restore();
   });
 
-  test('read() finds the given username', async () => {
-    expect(await userRepository.read('usernameExists')).to.deep.equal(<UserDTO>{
-      username: 'usernameExists',
-    });
+  test('read() : finds user by the given username', async () => {
+    expect(await userRepository.read('usernameExists')).to.be.deep.equal(<
+      UserDTO
+    >{ username: 'usernameExists' });
   });
 
-  test('read() does not find the given username', async () => {
+  test('read() : does not find user by the given username', async () => {
     expect(await userRepository.read('usernameDoesNotExist')).to.be.null;
   });
 });
-``;

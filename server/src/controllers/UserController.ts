@@ -19,7 +19,7 @@ export class UserController implements RegistrableController {
       const { username } = req.query as Partial<UserDTO>;
 
       if (username)
-        console.log('controller: ', await this.userService.getUser(username));
+        console.log('/user: ', await this.userService.getUser(username));
     });
   }
 }

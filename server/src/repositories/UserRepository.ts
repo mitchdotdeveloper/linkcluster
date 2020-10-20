@@ -8,7 +8,7 @@ export interface UserRepository {
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
-  async read(username: string): Promise<UserDTO | null> {
+  public async read(username: string): Promise<UserDTO | null> {
     const user = await db.query<UserDTO>(
       'SELECT username FROM users WHERE username = $1;',
       [username]
