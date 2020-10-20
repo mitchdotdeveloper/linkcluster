@@ -1,3 +1,5 @@
+# docker exec -it database /bin/bash
+
 version: '3'
 
 services:
@@ -10,4 +12,4 @@ services:
     environment:
       POSTGRES_PASSWORD: postgres
     volumes:
-      - $PWD/docker/database:/var/lib/postgresql/database
+      - $PWD/docker/database:/var/lib/postgresql/data

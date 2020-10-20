@@ -1,3 +1,17 @@
-const hello = (arg: string) => `hello ${arg}`;
+import 'reflect-metadata';
+import express from 'express';
+import { RegistrableController } from 'controllers/RegistrableController';
+import container from './inversify.config';
+import TYPES from './inversifyTypes';
 
-export { hello };
+const app = express();
+
+app.use(express.json());
+
+const controllers: RegistrableController[] = container.getAll<
+  RegistrableController
+>(TYPES.Controller);
+
+controllers.forEach((controller) => controller.register(app));
+
+app.listen(3000);
