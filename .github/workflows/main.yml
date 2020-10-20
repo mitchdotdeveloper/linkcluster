@@ -3,8 +3,14 @@ name: Test
 on:
   push:
     branches: [develop, feature/*, refactor/*, bugfix/*, hotfix/*]
+    paths:
+      - "server/**"
+      - ".github/workflows/**"
   pull_request:
     branches: [main, develop]
+    paths:
+      - "server/**"
+      - ".github/workflows/**"
 
 jobs:
   test:

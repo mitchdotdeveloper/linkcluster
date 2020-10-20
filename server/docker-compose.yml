@@ -1,0 +1,15 @@
+# docker exec -it database /bin/bash
+
+version: '3'
+
+services:
+  database:
+    image: postgres
+    container_name: database
+    restart: always
+    ports:
+      - 5432:5432
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - $PWD/docker/database:/var/lib/postgresql/data
