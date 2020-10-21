@@ -1,7 +1,7 @@
 import { Pool } from 'pg';
 
 const pool = new Pool({
-  connectionString: 'postgresql://postgres:postgres@localhost/linkcluster',
+  connectionString: process.env.DB_URL,
 });
 
 const query = <T>(
