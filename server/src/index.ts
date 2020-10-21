@@ -4,11 +4,25 @@ import helmet from 'helmet';
 import { RegistrableController } from 'controllers/RegistrableController';
 import container from './inversify.config';
 import TYPES from './inversifyTypes';
+import { store } from './connectCache';
+import session from 'express-session';
 
 const app = express();
 
-app.use(express.json());
 app.use(helmet());
+app.use(express.json());
+app.use(
+  session({
+    secret: process.env.SESSION_SECRET!,
+    name: 'sessionId',
+    resave: false,
+    saveUninitialized: true,
+    cookie: {
+      secure: process.env.NODE_ENV === 'production',
+    },
+    store: store(),
+  })
+);
 
 const controllers: RegistrableController[] = container.getAll<
   RegistrableController

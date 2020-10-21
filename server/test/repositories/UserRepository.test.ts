@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-expressions */
 import 'reflect-metadata';
 import { expect } from 'chai';
-import db from 'connect';
+import db from 'connectDB';
 import container from 'inversify.config';
 import TYPES from 'inversifyTypes';
 import { after, before, describe, test } from 'mocha';

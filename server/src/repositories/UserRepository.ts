@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import db from '../connect';
+import db from '../connectDB';
 import { UserDTO } from '../models/UserModel';
 
 export interface UserRepository {
