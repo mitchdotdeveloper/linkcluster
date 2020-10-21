@@ -6,7 +6,7 @@ import { describe, before, beforeEach, after, test } from 'mocha';
 import { UserService } from 'services/UserService';
 import { UserRepository } from 'repositories/UserRepository';
 import { UserDTO } from 'models/UserModel';
-import { OmitClassMethods } from 'utilityTypes';
+import { OmitClassMethods } from 'types';
 import { expect } from 'chai';
 
 describe('UserService Suite', () => {
