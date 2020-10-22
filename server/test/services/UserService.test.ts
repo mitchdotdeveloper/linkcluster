@@ -4,10 +4,10 @@ import container from 'inversify.config';
 import TYPES from 'inversifyTypes';
 import { describe, before, beforeEach, after, test } from 'mocha';
 import { UserService } from 'services/UserService';
-import { UserRepository } from 'repositories/UserRepository';
-import { UserDTO } from 'models/UserModel';
+import { UserDTO, UserRepository } from 'repositories/UserRepository';
 import { OmitClassMethods } from 'types';
 import { expect } from 'chai';
+import { User } from 'models/UserModel';
 
 describe('UserService Suite', () => {
   before(() => {
@@ -20,6 +20,42 @@ describe('UserService Suite', () => {
     container.restore();
   });
 
+  test('createUser() : creates new user', async () => {
+    container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
+      UserRepository
+    >{
+      create: (_username: string, _password: string, _salt: string) =>
+        Promise.resolve<Pick<UserDTO, 'username'>>({
+          username: 'username',
+        }),
+    });
+    const userService: UserService = container.get<UserService>(
+      TYPES.UserService
+    );
+
+    expect(
+      await userService.createUser('username', 'password', 'salt')
+    ).to.be.deep.equal(<OmitClassMethods<User>>{
+      username: 'username',
+      password: undefined,
+      salt: undefined,
+    });
+  });
+
+  test('createUser() : does not create a new user', async () => {
+    container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
+      UserRepository
+    >{
+      create: (_username: string, _password: string, _salt: string) =>
+        Promise.resolve(null),
+    });
+    const userService: UserService = container.get<UserService>(
+      TYPES.UserService
+    );
+
+    expect(await userService.createUser('username', '', 'salt')).to.be.null;
+  });
+
   test('getUser() : gets user by given username', async () => {
     container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
       UserRepository
@@ -30,6 +66,8 @@ describe('UserService Suite', () => {
             username === 'usernameExists'
               ? 'usernameExists'
               : 'usernameDoesNotExist',
+          password: 'myPassword',
+          salt: 'mySalt',
         }),
     });
     const userService: UserService = container.get<UserService>(
@@ -37,8 +75,12 @@ describe('UserService Suite', () => {
     );
 
     expect(await userService.getUser('usernameExists')).to.be.deep.equal(<
-      UserDTO
-    >{ username: 'usernameExists' });
+      OmitClassMethods<User>
+    >{
+      username: 'usernameExists',
+      password: 'myPassword',
+      salt: 'mySalt',
+    });
   });
 
   test('getUser() : does not get user by given username', async () => {
@@ -53,5 +95,33 @@ describe('UserService Suite', () => {
     );
 
     expect(await userService.getUser('usernameDoesNotExist')).to.be.null;
+  });
+
+  test('userExists() : user by given username exists', async () => {
+    container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
+      UserRepository
+    >{
+      exists: (username: string) =>
+        Promise.resolve<boolean>(username === 'usernameExists'),
+    });
+    const userService: UserService = container.get<UserService>(
+      TYPES.UserService
+    );
+
+    expect(await userService.userExists('usernameExists')).to.be.true;
+  });
+
+  test('userExists() : user by given username does not exist', async () => {
+    container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
+      UserRepository
+    >{
+      exists: (username: string) =>
+        Promise.resolve<boolean>(!(username === 'usernameDoesNotExist')),
+    });
+    const userService: UserService = container.get<UserService>(
+      TYPES.UserService
+    );
+
+    expect(await userService.userExists('usernameDoesNotExist')).to.be.false;
   });
 });

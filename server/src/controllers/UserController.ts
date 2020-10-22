@@ -3,7 +3,7 @@ import { RegistrableController } from '../controllers/RegistrableController';
 import { injectable, inject } from 'inversify';
 import TYPES from '../inversifyTypes';
 import { UserService } from 'services/UserService';
-import { UserDTO } from 'models/UserModel';
+import { UserDTO } from 'repositories/UserRepository';
 
 @injectable()
 export class UserController implements RegistrableController {
@@ -18,8 +18,9 @@ export class UserController implements RegistrableController {
     route.get('/', async (req) => {
       const { username } = req.query as Partial<UserDTO>;
 
-      if (username)
+      if (username) {
         console.log('/user: ', await this.userService.getUser(username));
+      }
     });
   }
 }

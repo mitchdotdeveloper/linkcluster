@@ -11,6 +11,7 @@ const app = express();
 
 app.use(helmet());
 app.use(express.json());
+
 app.use(
   session({
     secret: process.env.SESSION_SECRET!,
