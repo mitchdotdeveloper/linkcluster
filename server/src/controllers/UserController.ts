@@ -1,9 +1,11 @@
 import { Application, Router } from 'express';
-import { RegistrableController } from '../controllers/RegistrableController';
+import type { RegistrableController } from '../controllers/RegistrableController';
 import { injectable, inject } from 'inversify';
 import TYPES from '../inversifyTypes';
-import { UserService } from 'services/UserService';
-import { UserDTO } from 'models/UserModel';
+import type { UserService } from 'services/UserService';
+import type { UserDTO } from 'repositories/UserRepository';
+import { stripSensitiveProperties } from '../utilities/filter';
+import { authenticate } from '../middlewares/authenticate';
 
 @injectable()
 export class UserController implements RegistrableController {
@@ -15,11 +17,16 @@ export class UserController implements RegistrableController {
 
     app.use('/user', route);
 
-    route.get('/', async (req) => {
+    route.get('/', authenticate, async (req, res) => {
       const { username } = req.query as Partial<UserDTO>;
 
-      if (username)
-        console.log('/user: ', await this.userService.getUser(username));
+      if (!username) return res.sendStatus(400);
+
+      const user = await this.userService.getUser(username);
+
+      if (!user) return res.sendStatus(404);
+
+      return res.status(200).send(stripSensitiveProperties(user));
     });
   }
 }

@@ -1,4 +1,4 @@
-# docker exec -it database /bin/bash
+# docker exec -it {{container_name}} /bin/bash
 
 version: '3'
 
@@ -13,3 +13,12 @@ services:
       POSTGRES_PASSWORD: postgres
     volumes:
       - $PWD/docker/database:/var/lib/postgresql/data
+  cache:
+    image: redis
+    container_name: cache
+    command: ['redis-server', '/usr/local/etc/redis/redis.conf']
+    ports:
+      - 6379:6379
+    volumes:
+      - $PWD/docker/cache:/data
+      - $PWD/redis.conf:/usr/local/etc/redis/redis.conf

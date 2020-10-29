@@ -16,7 +16,6 @@
     "alwaysStrict": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "noImplicitReturns": true,
     "moduleResolution": "Node",
     "esModuleInterop": true,
     "skipLibCheck": true,
