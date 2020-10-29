@@ -1,12 +1,12 @@
 export class User {
   private username: string;
-  private password: string = '';
-  private salt: string = '';
+  private _password: string = '';
+  private _salt: string = '';
 
   constructor(username: string, password: string, salt: string) {
     this.username = username;
-    this.password = password;
-    this.salt = salt;
+    this._password = password;
+    this._salt = salt;
   }
 
   getUsername(): string {
@@ -14,11 +14,11 @@ export class User {
   }
 
   getPassword(): string {
-    return this.password;
+    return this._password;
   }
 
   getSalt(): string {
-    return this.salt;
+    return this._salt;
   }
 
   setUsername(username: string) {
@@ -27,12 +27,12 @@ export class User {
   }
 
   setPassword(password: string) {
-    this.password = password;
+    this._password = password;
     return this;
   }
 
   setSalt(salt: string) {
-    this.salt = salt;
+    this._salt = salt;
     return this;
   }
 }

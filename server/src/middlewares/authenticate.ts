@@ -1,27 +1,13 @@
-import { NextFunction, Request, Response } from 'express';
-import { UserService } from 'services/UserService';
-import container from '../inversify.config';
-import TYPES from '../inversifyTypes';
+import type { NextFunction, Request, Response } from 'express';
 
 export const authenticate = async (
-  req: Request & { username: string },
+  req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { session, sessionID, username } = req;
-  if (session && sessionID && username) {
-    const userService: UserService = container.get<UserService>(
-      TYPES.UserService
-    );
+  const { session, sessionID } = req;
 
-    const userExists = await userService.userExists(username);
+  if (!session || !sessionID || !session.loggedIn) return res.sendStatus(403);
 
-    if (userExists) {
-      next();
-    } else {
-      res.sendStatus(401);
-    }
-  } else {
-    res.sendStatus(401);
-  }
+  next();
 };

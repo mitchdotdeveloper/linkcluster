@@ -1,9 +1,10 @@
-import { Application, Request, Router } from 'express';
+import { Application, Router } from 'express';
 import { RegistrableController } from '../controllers/RegistrableController';
 import { inject, injectable } from 'inversify';
 import TYPES from '../inversifyTypes';
 import { AuthService } from '../services/AuthService';
 import { UserService } from '../services/UserService';
+import { stripSensitiveProperties } from '../utilities/filter';
 
 @injectable()
 export class AuthController implements RegistrableController {
@@ -18,42 +19,69 @@ export class AuthController implements RegistrableController {
 
     app.use('/auth', route);
 
-    route.post('/signup', async (req: Request, res) => {
+    route.post('/signup', async (req, res) => {
       const { username, password } = req.body as {
         username: string;
         password: string;
       };
 
-      if (username && password) {
-        const userExists = await this.userService.userExists(username);
-        console.log(userExists);
-        if (!userExists) {
-          const {
-            hashedPassword,
-            salt,
-          } = await this.authService.hashAndSaltPassword(password);
+      if (!username || !password) return res.sendStatus(400);
 
-          console.log(hashedPassword, salt);
+      const userAlreadyExists = await this.userService.userExists(username);
 
-          const user = await this.userService.createUser(
-            username,
-            hashedPassword,
-            salt
-          );
+      if (userAlreadyExists) return res.sendStatus(409);
 
-          console.log('AuthController: ', user);
+      const {
+        hashedPassword,
+        salt,
+      } = await this.authService.hashAndSaltPassword(password);
 
-          if (user) {
-            res.status(201).send({ username: user.getUsername() });
-          } else {
-            res.sendStatus(500);
-          }
-        } else {
-          res.sendStatus(409);
-        }
-      } else {
-        res.sendStatus(400);
-      }
+      const user = await this.userService.createUser(
+        username,
+        hashedPassword,
+        salt
+      );
+
+      if (!user) return res.sendStatus(500);
+
+      return res.status(201).send({ username: user.getUsername() });
+    });
+
+    route.post('/login', async (req, res) => {
+      const { session, body } = req;
+      const { username, password } = body as {
+        username: string;
+        password: string;
+      };
+
+      if (!username || !password) return res.sendStatus(400);
+
+      const user = await this.userService.getUser(username);
+
+      if (!user) return res.sendStatus(404);
+
+      const { hashedPassword } = await this.authService.hashAndSaltPassword(
+        password,
+        user.getSalt()
+      );
+
+      if (hashedPassword !== user.getPassword()) return res.sendStatus(403);
+
+      if (session) session.loggedIn = true;
+      return res.status(200).send(stripSensitiveProperties(user));
+    });
+
+    route.delete('/logout', async (req, res) => {
+      const { session, sessionID } = req;
+      if (!session || !sessionID) return res.sendStatus(400);
+
+      session.loggedIn = false;
+      session.destroy((err) => {
+        if (err) return res.sendStatus(500);
+
+        res.clearCookie('sessionId');
+        res.sendStatus(200);
+      });
     });
   }
 }
