@@ -4,7 +4,7 @@
   "scripts": {
     "build": "tsc -b src",
     "watch": "npm run build -- -w",
-    "dev": "nodemon -r ts-node src/index.ts",
+    "dev": "nodemon -r dotenv/config -r ts-node src/index.ts",
     "dev:dockerup": "docker-compose up --build -d",
     "dev:dockerdown": "docker-compose down",
     "test": "mocha -r ts-node/register -r tsconfig-paths/register test/**/*.test.ts",
@@ -12,16 +12,22 @@
   },
   "author": "Mitch O'Hair",
   "dependencies": {
+    "connect-redis": "^5.0.0",
     "express": "^4.17.1",
+    "express-session": "^1.17.1",
     "pg": "^8.4.1",
+    "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13"
   },
   "devDependencies": {
     "@types/chai": "^4.2.13",
+    "@types/connect-redis": "0.0.14",
     "@types/express": "^4.17.8",
+    "@types/express-session": "^1.17.0",
     "@types/mocha": "^8.0.3",
     "@types/node": "^14.11.8",
     "@types/pg": "^7.14.5",
+    "@types/redis": "^2.8.28",
     "@types/sinon": "^9.0.8",
     "@typescript-eslint/eslint-plugin": "^4.4.0",
     "@typescript-eslint/parser": "^4.4.0",
