@@ -37,8 +37,8 @@ describe('UserService Suite', () => {
       await userService.createUser('username', 'password', 'salt')
     ).to.be.deep.equal(<OmitClassMethods<User>>{
       username: 'username',
-      password: undefined,
-      salt: undefined,
+      _password: undefined,
+      _salt: undefined,
     });
   });
 
@@ -56,7 +56,7 @@ describe('UserService Suite', () => {
     expect(await userService.createUser('username', '', 'salt')).to.be.null;
   });
 
-  test('getUser() : gets user by given username', async () => {
+  test('getUser()    : gets user by given username', async () => {
     container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
       UserRepository
     >{
@@ -78,12 +78,12 @@ describe('UserService Suite', () => {
       OmitClassMethods<User>
     >{
       username: 'usernameExists',
-      password: 'myPassword',
-      salt: 'mySalt',
+      _password: 'myPassword',
+      _salt: 'mySalt',
     });
   });
 
-  test('getUser() : does not get user by given username', async () => {
+  test('getUser()    : does not get user by given username', async () => {
     container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
       UserRepository
     >{

@@ -101,7 +101,7 @@ describe('UserRepository Suite', () => {
     expect(await userRepository.create('username', '', 'salt')).to.be.null;
   });
 
-  test('read() : finds user by the given username', async () => {
+  test('read()   : finds user by the given username', async () => {
     expect(await userRepository.read('usernameExists')).to.be.deep.equal(<
       UserDTO
     >{
@@ -111,7 +111,7 @@ describe('UserRepository Suite', () => {
     });
   });
 
-  test('read() : does not find user by the given username', async () => {
+  test('read()   : does not find user by the given username', async () => {
     expect(await userRepository.read('usernameDoesNotExist')).to.be.null;
   });
 

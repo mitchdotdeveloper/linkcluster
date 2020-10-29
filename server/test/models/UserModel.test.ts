@@ -14,7 +14,7 @@ describe('UserModel Suite', () => {
     expect(user.getPassword()).to.be.equal('myPassword');
   });
 
-  test('getSalt() : returns member salt', () => {
+  test('getSalt()     : returns member salt', () => {
     expect(user.getSalt()).to.be.equal('mySalt');
   });
 
@@ -30,7 +30,7 @@ describe('UserModel Suite', () => {
     );
   });
 
-  test('setSalt() : sets member salt', () => {
+  test('setSalt()     : sets member salt', () => {
     expect(user.setSalt('myNewSalt').getSalt()).to.be.equal('myNewSalt');
   });
 });
