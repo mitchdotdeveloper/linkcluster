@@ -20,7 +20,11 @@ export interface UserRepository {
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
-  public async create(username: string, password: string, salt: string) {
+  public async create(
+    username: string,
+    password: string,
+    salt: string
+  ): Promise<Pick<UserDTO, 'userID' | 'username'> | null> {
     const { rows, rowCount } = await db.query<
       Pick<UserDTO, 'userID' | 'username'>
     >(
