@@ -19,7 +19,12 @@ export class UserServiceImpl implements UserService {
   private userRepository!: UserRepository;
 
   private toUser(userDTO: UserDTO) {
-    return new User(userDTO.username, userDTO.password, userDTO.salt);
+    return new User(
+      userDTO.userID,
+      userDTO.username,
+      userDTO.password,
+      userDTO.salt
+    );
   }
 
   public async createUser(username: string, password: string, salt: string) {
@@ -31,7 +36,7 @@ export class UserServiceImpl implements UserService {
 
     if (!userWasCreated) return null;
 
-    return this.toUser({ username } as UserDTO);
+    return this.toUser(userWasCreated as UserDTO);
   }
 
   public async getUser(username: string): Promise<User | null> {

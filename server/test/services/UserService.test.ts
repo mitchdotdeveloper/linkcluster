@@ -25,7 +25,8 @@ describe('UserService Suite', () => {
       UserRepository
     >{
       create: (_username: string, _password: string, _salt: string) =>
-        Promise.resolve<Pick<UserDTO, 'username'>>({
+        Promise.resolve<Pick<UserDTO, 'userID' | 'username'>>({
+          userID: 16,
           username: 'username',
         }),
     });
@@ -36,6 +37,7 @@ describe('UserService Suite', () => {
     expect(
       await userService.createUser('username', 'password', 'salt')
     ).to.be.deep.equal(<OmitClassMethods<User>>{
+      userID: 16,
       username: 'username',
       _password: undefined,
       _salt: undefined,
@@ -62,6 +64,7 @@ describe('UserService Suite', () => {
     >{
       read: (username: string) =>
         Promise.resolve<OmitClassMethods<UserDTO>>({
+          userID: 16,
           username:
             username === 'usernameExists'
               ? 'usernameExists'
@@ -77,6 +80,7 @@ describe('UserService Suite', () => {
     expect(await userService.getUser('usernameExists')).to.be.deep.equal(<
       OmitClassMethods<User>
     >{
+      userID: 16,
       username: 'usernameExists',
       _password: 'myPassword',
       _salt: 'mySalt',

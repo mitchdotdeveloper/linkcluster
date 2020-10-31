@@ -1,8 +1,9 @@
 const TYPES = {
   Controller: Symbol('Controller'),
+  AuthService: Symbol('AuthService'),
   UserService: Symbol('UserService'),
   UserRepository: Symbol('UserRepository'),
-  AuthService: Symbol('AuthService'),
+  LinkRepository: Symbol('LinkRepository'),
 };
 
 export default TYPES;

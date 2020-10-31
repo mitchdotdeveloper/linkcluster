@@ -19,12 +19,13 @@ describe('UserRepository Suite', () => {
   before(() => {
     queryStub
       .withArgs(
-        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING username;',
+        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING userID, username;',
         ['username', 'password', 'salt']
       )
-      .resolves(<QueryResult<Pick<UserDTO, 'username'>>>{
+      .resolves(<QueryResult<Pick<UserDTO, 'userID' | 'username'>>>{
         rows: [
           {
+            userID: 16,
             username: 'username',
           },
         ],
@@ -33,7 +34,7 @@ describe('UserRepository Suite', () => {
 
     queryStub
       .withArgs(
-        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING username;',
+        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING userID, username;',
         ['username', '', 'salt']
       )
       .resolves(<QueryResult<never>>{
@@ -43,12 +44,13 @@ describe('UserRepository Suite', () => {
 
     queryStub
       .withArgs(
-        'SELECT username,password,salt FROM users WHERE username = $1;',
+        'SELECT userID,username,password,salt FROM users WHERE username = $1;',
         ['usernameExists']
       )
       .resolves(<QueryResult<UserDTO>>{
         rows: [
           {
+            userID: 16,
             username: 'usernameExists',
             password: 'mySecretPassword',
             salt: 'mySecretSalt',
@@ -59,7 +61,7 @@ describe('UserRepository Suite', () => {
 
     queryStub
       .withArgs(
-        'SELECT username,password,salt FROM users WHERE username = $1;',
+        'SELECT userID,username,password,salt FROM users WHERE username = $1;',
         ['usernameDoesNotExist']
       )
       .resolves(<QueryResult<never>>{
@@ -92,7 +94,8 @@ describe('UserRepository Suite', () => {
   test('create() : creates new user in database', async () => {
     expect(
       await userRepository.create('username', 'password', 'salt')
-    ).to.be.deep.equal(<Pick<UserDTO, 'username'>>{
+    ).to.be.deep.equal(<Pick<UserDTO, 'userID' | 'username'>>{
+      userID: 16,
       username: 'username',
     });
   });
@@ -105,6 +108,7 @@ describe('UserRepository Suite', () => {
     expect(await userRepository.read('usernameExists')).to.be.deep.equal(<
       UserDTO
     >{
+      userID: 16,
       username: 'usernameExists',
       password: 'mySecretPassword',
       salt: 'mySecretSalt',

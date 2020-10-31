@@ -2,6 +2,7 @@ import { injectable } from 'inversify';
 import db from '../connectDB';
 
 export type UserDTO = {
+  userID: number;
   username: string;
   password: string;
   salt: string;
@@ -12,7 +13,7 @@ export interface UserRepository {
     username: string,
     password: string,
     salt: string
-  ): Promise<Pick<UserDTO, 'username'> | null>;
+  ): Promise<Pick<UserDTO, 'userID' | 'username'> | null>;
   read(username: string): Promise<UserDTO | null>;
   exists(username: string): Promise<boolean>;
 }
@@ -20,8 +21,10 @@ export interface UserRepository {
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
   public async create(username: string, password: string, salt: string) {
-    const { rows, rowCount } = await db.query<Pick<UserDTO, 'username'>>(
-      'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING username;',
+    const { rows, rowCount } = await db.query<
+      Pick<UserDTO, 'userID' | 'username'>
+    >(
+      'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING userID, username;',
       [username, password, salt]
     );
 
@@ -31,7 +34,12 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   public async read(username: string): Promise<UserDTO | null> {
-    const userFields: (keyof UserDTO)[] = ['username', 'password', 'salt'];
+    const userFields: (keyof UserDTO)[] = [
+      'userID',
+      'username',
+      'password',
+      'salt',
+    ];
     const user = await db.query<UserDTO>(
       `SELECT ${userFields.toString()} FROM users WHERE username = $1;`,
       [username]
