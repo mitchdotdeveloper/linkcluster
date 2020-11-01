@@ -31,7 +31,7 @@ export class LinkRepositoryImpl implements LinkRepository {
     const { rows, rowCount } = await db.query<
       Pick<LinkDTO, 'linkID' | 'linkTitle' | 'link'>
     >(
-      'INSERT INTO links(userID, linkTitle, link) VALUES ($1, $2, $3) RETURNING linkID, linkTitle, link;',
+      'INSERT INTO links("userID", "linkTitle", link) VALUES ($1, $2, $3) RETURNING "linkID", "linkTitle", link;',
       [userID, linkTitle, link]
     );
 
@@ -41,14 +41,9 @@ export class LinkRepositoryImpl implements LinkRepository {
   }
 
   public async readAll(userID: number): Promise<LinkDTO[] | null> {
-    const linkFields: (keyof LinkDTO)[] = [
-      'userID',
-      'linkID',
-      'linkTitle',
-      'link',
-    ];
+    const linkFields = ['"userID"', '"linkID"', '"linkTitle"', 'link'];
     const links = await db.query<LinkDTO>(
-      `SELECT ${linkFields.toString()} FROM links WHERE userID = $1;`,
+      `SELECT ${linkFields.toString()} FROM links WHERE "userID" = $1;`,
       [userID]
     );
 
@@ -67,13 +62,13 @@ export class LinkRepositoryImpl implements LinkRepository {
     });
     let paramPlaceholder = 1;
     const updateQueryFields = Object.keys(propertiesToUpdate).map(
-      (key) => `${key} = $${paramPlaceholder++}`
+      (key) => `"${key}" = $${paramPlaceholder++}`
     );
 
     if (!updateQueryFields.length) return null;
 
     const linkResult = await db.query<Pick<LinkDTO, 'linkID'>>(
-      `UPDATE links SET ${updateQueryFields.toString()} WHERE linkID = $${paramPlaceholder} RETURNING linkID;`,
+      `UPDATE links SET ${updateQueryFields.toString()} WHERE "linkID" = $${paramPlaceholder} RETURNING "linkID";`,
       [...(Object.values(propertiesToUpdate) as (string | number)[]), linkID]
     );
 

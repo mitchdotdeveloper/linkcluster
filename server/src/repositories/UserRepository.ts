@@ -28,7 +28,7 @@ export class UserRepositoryImpl implements UserRepository {
     const { rows, rowCount } = await db.query<
       Pick<UserDTO, 'userID' | 'username'>
     >(
-      'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING userID, username;',
+      'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING "userID", username;',
       [username, password, salt]
     );
 
@@ -38,12 +38,7 @@ export class UserRepositoryImpl implements UserRepository {
   }
 
   public async read(username: string): Promise<UserDTO | null> {
-    const userFields: (keyof UserDTO)[] = [
-      'userID',
-      'username',
-      'password',
-      'salt',
-    ];
+    const userFields = ['"userID"', 'username', 'password', 'salt'];
     const user = await db.query<UserDTO>(
       `SELECT ${userFields.toString()} FROM users WHERE username = $1;`,
       [username]

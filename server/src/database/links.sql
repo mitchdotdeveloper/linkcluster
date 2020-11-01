@@ -25,9 +25,9 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.links (
-    userid integer,
-    linkid integer NOT NULL,
-    linktitle text NOT NULL,
+    "userID" integer,
+    "linkID" integer NOT NULL,
+    "linkTitle" text NOT NULL,
     link text NOT NULL
 );
 
@@ -35,10 +35,10 @@ CREATE TABLE public.links (
 ALTER TABLE public.links OWNER TO postgres;
 
 --
--- Name: links_linkid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: links_linkID_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.links_linkid_seq
+CREATE SEQUENCE public."links_linkID_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -47,20 +47,20 @@ CREATE SEQUENCE public.links_linkid_seq
     CACHE 1;
 
 
-ALTER TABLE public.links_linkid_seq OWNER TO postgres;
+ALTER TABLE public."links_linkID_seq" OWNER TO postgres;
 
 --
--- Name: links_linkid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: links_linkID_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.links_linkid_seq OWNED BY public.links.linkid;
+ALTER SEQUENCE public."links_linkID_seq" OWNED BY public.links."linkID";
 
 
 --
--- Name: links linkid; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: links linkID; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.links ALTER COLUMN linkid SET DEFAULT nextval('public.links_linkid_seq'::regclass);
+ALTER TABLE ONLY public.links ALTER COLUMN "linkID" SET DEFAULT nextval('public."links_linkID_seq"'::regclass);
 
 
 --
@@ -68,15 +68,15 @@ ALTER TABLE ONLY public.links ALTER COLUMN linkid SET DEFAULT nextval('public.li
 --
 
 ALTER TABLE ONLY public.links
-    ADD CONSTRAINT links_pkey PRIMARY KEY (linkid);
+    ADD CONSTRAINT links_pkey PRIMARY KEY ("linkID");
 
 
 --
--- Name: links links_userid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
+-- Name: links links_userID_fkey; Type: FK CONSTRAINT; Schema: public; Owner: postgres
 --
 
 ALTER TABLE ONLY public.links
-    ADD CONSTRAINT links_userid_fkey FOREIGN KEY (userid) REFERENCES public.users(userid);
+    ADD CONSTRAINT "links_userID_fkey" FOREIGN KEY ("userID") REFERENCES public.users("userID");
 
 
 --

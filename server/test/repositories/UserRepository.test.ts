@@ -20,7 +20,7 @@ describe('UserRepository Suite', () => {
     queryStub = stub(db, 'query');
     queryStub
       .withArgs(
-        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING userID, username;',
+        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING "userID", username;',
         ['username', 'password', 'salt']
       )
       .resolves(<QueryResult<Pick<UserDTO, 'userID' | 'username'>>>{
@@ -35,7 +35,7 @@ describe('UserRepository Suite', () => {
 
     queryStub
       .withArgs(
-        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING userID, username;',
+        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING "userID", username;',
         ['username', '', 'salt']
       )
       .resolves(<QueryResult<never>>{
@@ -45,7 +45,7 @@ describe('UserRepository Suite', () => {
 
     queryStub
       .withArgs(
-        'SELECT userID,username,password,salt FROM users WHERE username = $1;',
+        'SELECT "userID",username,password,salt FROM users WHERE username = $1;',
         ['usernameExists']
       )
       .resolves(<QueryResult<UserDTO>>{
@@ -62,7 +62,7 @@ describe('UserRepository Suite', () => {
 
     queryStub
       .withArgs(
-        'SELECT userID,username,password,salt FROM users WHERE username = $1;',
+        'SELECT "userID",username,password,salt FROM users WHERE username = $1;',
         ['usernameDoesNotExist']
       )
       .resolves(<QueryResult<never>>{

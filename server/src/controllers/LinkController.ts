@@ -1,11 +1,17 @@
 import { Application, Router } from 'express';
 import type { RegistrableController } from '../controllers/RegistrableController';
-import { injectable } from 'inversify';
+import { inject, injectable } from 'inversify';
 import { authenticate } from '../middlewares/authenticate';
 import type { LinkDTO } from '../repositories/LinkRepository';
+import { LinkService } from 'services/LinkService';
+import TYPES from '../inversifyTypes';
+import { stripSensitiveProperties } from '../utilities/filter';
 
 @injectable()
 export class LinkController implements RegistrableController {
+  @inject(TYPES.LinkService)
+  private linkService!: LinkService;
+
   public register(app: Application) {
     const linkRouter = Router();
 
@@ -16,11 +22,15 @@ export class LinkController implements RegistrableController {
 
       if (!userID || !linkTitle || !link) return res.sendStatus(400);
 
-      // const createdLink = await this.linkService.createLink(userID, linkTitle, link);
+      const createdLink = await this.linkService.createLink(
+        userID,
+        linkTitle,
+        link
+      );
 
-      // if (!createdLink) return res.sendStatus(500);
+      if (!createdLink) return res.sendStatus(500);
 
-      // return res.status(201).send(stripSensitiveProperties(createdLink));
+      return res.status(201).send(stripSensitiveProperties(createdLink));
     });
 
     linkRouter.patch('/', authenticate, async (req, res) => {
@@ -28,11 +38,15 @@ export class LinkController implements RegistrableController {
 
       if (!linkID || (!linkTitle && !link)) return res.sendStatus(400);
 
-      // const updatedLink = await this.linkService.updateLink(linkID, linkTitle, link);
+      const updatedLink = await this.linkService.updateLink(
+        linkID,
+        linkTitle,
+        link
+      );
 
-      // if (!updatedLink) return res.sendStatus(500);
+      if (!updatedLink) return res.sendStatus(500);
 
-      // return res.status(200).send({linkID: updatedLink.getLinkID()});
+      return res.status(200).send({ linkID: updatedLink.getLinkID() });
     });
 
     const linksRouter = Router();
@@ -44,11 +58,11 @@ export class LinkController implements RegistrableController {
 
       if (!userID) return res.sendStatus(400);
 
-      // const links = await this.linkService.getLinks(userID);
+      const links = await this.linkService.getLinks(userID);
 
-      // if (!links) return res.sendStatus(404)
+      if (!links) return res.sendStatus(404);
 
-      // return res.status(200).send(links);
+      return res.status(200).send({ links });
     });
   }
 }

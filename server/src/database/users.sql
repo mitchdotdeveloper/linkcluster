@@ -25,7 +25,7 @@ SET default_table_access_method = heap;
 --
 
 CREATE TABLE public.users (
-    userid integer NOT NULL,
+    "userID" integer NOT NULL,
     username character varying(50) NOT NULL,
     password character varying(64) NOT NULL,
     salt character varying(32) NOT NULL
@@ -35,10 +35,10 @@ CREATE TABLE public.users (
 ALTER TABLE public.users OWNER TO postgres;
 
 --
--- Name: users_userid_seq; Type: SEQUENCE; Schema: public; Owner: postgres
+-- Name: users_userID_seq; Type: SEQUENCE; Schema: public; Owner: postgres
 --
 
-CREATE SEQUENCE public.users_userid_seq
+CREATE SEQUENCE public."users_userID_seq"
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -47,20 +47,20 @@ CREATE SEQUENCE public.users_userid_seq
     CACHE 1;
 
 
-ALTER TABLE public.users_userid_seq OWNER TO postgres;
+ALTER TABLE public."users_userID_seq" OWNER TO postgres;
 
 --
--- Name: users_userid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
+-- Name: users_userID_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: postgres
 --
 
-ALTER SEQUENCE public.users_userid_seq OWNED BY public.users.userid;
+ALTER SEQUENCE public."users_userID_seq" OWNED BY public.users."userID";
 
 
 --
--- Name: users userid; Type: DEFAULT; Schema: public; Owner: postgres
+-- Name: users userID; Type: DEFAULT; Schema: public; Owner: postgres
 --
 
-ALTER TABLE ONLY public.users ALTER COLUMN userid SET DEFAULT nextval('public.users_userid_seq'::regclass);
+ALTER TABLE ONLY public.users ALTER COLUMN "userID" SET DEFAULT nextval('public."users_userID_seq"'::regclass);
 
 
 --
@@ -68,7 +68,7 @@ ALTER TABLE ONLY public.users ALTER COLUMN userid SET DEFAULT nextval('public.us
 --
 
 ALTER TABLE ONLY public.users
-    ADD CONSTRAINT users_pkey PRIMARY KEY (userid);
+    ADD CONSTRAINT users_pkey PRIMARY KEY ("userID");
 
 
 --

@@ -20,7 +20,7 @@ describe('LinkRepository Suite', () => {
     queryStub = stub(db, 'query');
     queryStub
       .withArgs(
-        'INSERT INTO links(userID, linkTitle, link) VALUES ($1, $2, $3) RETURNING linkID, linkTitle, link;',
+        'INSERT INTO links("userID", "linkTitle", link) VALUES ($1, $2, $3) RETURNING "linkID", "linkTitle", link;',
         [12, 'myLink', 'www.link.com']
       )
       .resolves(<QueryResult<Omit<LinkDTO, 'userID'>>>{
@@ -36,7 +36,7 @@ describe('LinkRepository Suite', () => {
 
     queryStub
       .withArgs(
-        'INSERT INTO links(userID, linkTitle, link) VALUES ($1, $2, $3) RETURNING linkID, linkTitle, link;',
+        'INSERT INTO links("userID", "linkTitle", link) VALUES ($1, $2, $3) RETURNING "linkID", "linkTitle", link;',
         [12, '', 'www.link.com']
       )
       .resolves(<QueryResult<never>>{
@@ -46,7 +46,7 @@ describe('LinkRepository Suite', () => {
 
     queryStub
       .withArgs(
-        `SELECT userID,linkID,linkTitle,link FROM links WHERE userID = $1;`,
+        `SELECT "userID","linkID","linkTitle",link FROM links WHERE "userID" = $1;`,
         [12]
       )
       .resolves(<QueryResult<LinkDTO>>{
@@ -60,7 +60,7 @@ describe('LinkRepository Suite', () => {
 
     queryStub
       .withArgs(
-        `SELECT userID,linkID,linkTitle,link FROM links WHERE userID = $1;`,
+        `SELECT "userID","linkID","linkTitle",link FROM links WHERE "userID" = $1;`,
         [11]
       )
       .resolves(<QueryResult<never>>{
@@ -70,7 +70,7 @@ describe('LinkRepository Suite', () => {
 
     queryStub
       .withArgs(
-        `UPDATE links SET linkTitle = $1,link = $2 WHERE linkID = $3 RETURNING linkID;`,
+        `UPDATE links SET "linkTitle" = $1,"link" = $2 WHERE "linkID" = $3 RETURNING "linkID";`,
         ['newLinkTitle', 'newLink', 16]
       )
       .resolves(<QueryResult<Pick<LinkDTO, 'linkID'>>>{
@@ -80,7 +80,7 @@ describe('LinkRepository Suite', () => {
 
     queryStub
       .withArgs(
-        `UPDATE links SET linkTitle = $1,link = $2 WHERE linkID = $3 RETURNING linkID;`,
+        `UPDATE links SET "linkTitle" = $1,"link" = $2 WHERE "linkID" = $3 RETURNING "linkID";`,
         ['newLinkTitle', 'newLink', 15]
       )
       .resolves(<QueryResult<never>>{
