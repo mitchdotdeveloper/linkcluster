@@ -1,5 +1,5 @@
 import { injectable } from 'inversify';
-import { stripNullOrUndefinedProperties } from '../utilities/filter';
+import { stripFalsyProperties } from '../utilities/filter';
 import db from '../connectDB';
 
 export type LinkDTO = {
@@ -57,7 +57,7 @@ export class LinkRepositoryImpl implements LinkRepository {
     linkObj: Omit<LinkDTO, 'userID'>
   ): Promise<Pick<LinkDTO, 'linkID'> | null> {
     const { linkID, linkTitle, link } = linkObj;
-    const propertiesToUpdate = stripNullOrUndefinedProperties({
+    const propertiesToUpdate = stripFalsyProperties({
       linkTitle,
       link,
     });
@@ -66,9 +66,11 @@ export class LinkRepositoryImpl implements LinkRepository {
       (key) => `${key} = $${paramPlaceholder++}`
     );
 
+    if (!updateQueryFields.length) return null;
+
     const linkResult = await db.query<Pick<LinkDTO, 'linkID'>>(
       `UPDATE links SET ${updateQueryFields.toString()} WHERE linkID = $${paramPlaceholder} RETURNING linkID;`,
-      [...(Object.values(propertiesToUpdate) as any[]), linkID]
+      [...(Object.values(propertiesToUpdate) as (string | number)[]), linkID]
     );
 
     if (!linkResult.rowCount) return null;

@@ -7,16 +7,17 @@ import TYPES from 'inversifyTypes';
 import { after, before, describe, test } from 'mocha';
 import { QueryResult } from 'pg';
 import { UserDTO, UserRepository } from 'repositories/UserRepository';
-import { stub } from 'sinon';
+import { SinonStub, stub } from 'sinon';
 
 describe('UserRepository Suite', () => {
   const userRepository: UserRepository = container.get<UserRepository>(
     TYPES.UserRepository
   );
 
-  const queryStub = stub(db, 'query');
+  let queryStub: SinonStub;
 
   before(() => {
+    queryStub = stub(db, 'query');
     queryStub
       .withArgs(
         'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING userID, username;',
@@ -91,7 +92,7 @@ describe('UserRepository Suite', () => {
     queryStub.restore();
   });
 
-  test('create() : creates new user in database', async () => {
+  test('create() : creates new user in users table', async () => {
     expect(
       await userRepository.create('username', 'password', 'salt')
     ).to.be.deep.equal(<Pick<UserDTO, 'userID' | 'username'>>{
@@ -100,7 +101,7 @@ describe('UserRepository Suite', () => {
     });
   });
 
-  test('create() : cant create a new user in database', async () => {
+  test('create() : cant create a new user in users table', async () => {
     expect(await userRepository.create('username', '', 'salt')).to.be.null;
   });
 
