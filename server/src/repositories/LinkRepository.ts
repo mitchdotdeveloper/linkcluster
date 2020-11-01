@@ -23,7 +23,11 @@ export interface LinkRepository {
 
 @injectable()
 export class LinkRepositoryImpl implements LinkRepository {
-  public async create(userID: number, linkTitle: string, link: string) {
+  public async create(
+    userID: number,
+    linkTitle: string,
+    link: string
+  ): Promise<Omit<LinkDTO, 'userID'> | null> {
     const { rows, rowCount } = await db.query<
       Pick<LinkDTO, 'linkID' | 'linkTitle' | 'link'>
     >(
