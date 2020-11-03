@@ -60,7 +60,7 @@ export class LinkServiceImpl implements LinkService {
 
     if (!updatedLinkID) return null;
 
-    return this.toLink(updatedLinkID as LinkDTO);
+    return this.toLink({ linkID: updatedLinkID } as LinkDTO);
   }
 
   public async getLinks(userID: number): Promise<LinkDTO[] | null> {

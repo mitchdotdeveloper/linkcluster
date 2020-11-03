@@ -1,6 +1,5 @@
 import { injectable } from 'inversify';
-import { stripFalsyProperties } from '../utilities/filter';
-import db from '../connectDB';
+import { knex } from '../connectDB';
 
 export type LinkDTO = {
   userID: number;
@@ -16,9 +15,7 @@ export interface LinkRepository {
     link: string
   ): Promise<Omit<LinkDTO, 'userID'> | null>;
   readAll(userID: number): Promise<LinkDTO[] | null>;
-  update(
-    linkObj: Omit<LinkDTO, 'userID'>
-  ): Promise<Pick<LinkDTO, 'linkID'> | null>;
+  update(linkObj: Omit<LinkDTO, 'userID'>): Promise<LinkDTO['linkID'] | null>;
 }
 
 @injectable()
@@ -28,52 +25,38 @@ export class LinkRepositoryImpl implements LinkRepository {
     linkTitle: string,
     link: string
   ): Promise<Omit<LinkDTO, 'userID'> | null> {
-    const { rows, rowCount } = await db.query<
-      Pick<LinkDTO, 'linkID' | 'linkTitle' | 'link'>
-    >(
-      'INSERT INTO links("userID", "linkTitle", link) VALUES ($1, $2, $3) RETURNING "linkID", "linkTitle", link;',
-      [userID, linkTitle, link]
-    );
+    const [createdLink] = await knex
+      .from<LinkDTO>('links')
+      .insert({ userID, linkTitle, link })
+      .returning(['linkID', 'linkTitle', 'link']);
 
-    if (!rowCount) return null;
+    if (!createdLink) return null;
 
-    return rows[0];
+    return createdLink;
   }
 
   public async readAll(userID: number): Promise<LinkDTO[] | null> {
-    const linkFields = ['"userID"', '"linkID"', '"linkTitle"', 'link'];
-    const links = await db.query<LinkDTO>(
-      `SELECT ${linkFields.toString()} FROM links WHERE "userID" = $1;`,
-      [userID]
-    );
+    const links = await knex
+      .from<LinkDTO>('links')
+      .select('userID', 'linkID', 'linkTitle', 'link')
+      .where({ userID });
 
-    if (!links.rowCount) return null;
+    if (!links.length) return null;
 
-    return links.rows;
+    return links;
   }
 
   public async update(
     linkObj: Omit<LinkDTO, 'userID'>
-  ): Promise<Pick<LinkDTO, 'linkID'> | null> {
-    const { linkID, linkTitle, link } = linkObj;
-    const propertiesToUpdate = stripFalsyProperties({
-      linkTitle,
-      link,
-    });
-    let paramPlaceholder = 1;
-    const updateQueryFields = Object.keys(propertiesToUpdate).map(
-      (key) => `"${key}" = $${paramPlaceholder++}`
-    );
+  ): Promise<LinkDTO['linkID'] | null> {
+    const [linkID] = await knex
+      .from<LinkDTO>('links')
+      .update(linkObj)
+      .where({ linkID: linkObj.linkID })
+      .returning('linkID');
 
-    if (!updateQueryFields.length) return null;
+    if (!linkID) return null;
 
-    const linkResult = await db.query<Pick<LinkDTO, 'linkID'>>(
-      `UPDATE links SET ${updateQueryFields.toString()} WHERE "linkID" = $${paramPlaceholder} RETURNING "linkID";`,
-      [...(Object.values(propertiesToUpdate) as (string | number)[]), linkID]
-    );
-
-    if (!linkResult.rowCount) return null;
-
-    return linkResult.rows[0];
+    return linkID;
   }
 }
