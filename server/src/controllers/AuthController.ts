@@ -27,7 +27,7 @@ export class AuthController implements RegistrableController {
 
       if (!username || !password) return res.sendStatus(400);
 
-      const userAlreadyExists = await this.userService.userExists(username);
+      const userAlreadyExists = false; // await this.userService.userExists(username);
 
       if (userAlreadyExists) return res.sendStatus(409);
 

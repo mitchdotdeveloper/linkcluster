@@ -1,11 +1,10 @@
 /* eslint-disable no-unused-expressions */
 import 'reflect-metadata';
 import { expect } from 'chai';
-import db from 'connectDB';
+import { knex } from 'connectDB';
 import container from 'inversify.config';
 import TYPES from 'inversifyTypes';
-import { after, before, describe, test } from 'mocha';
-import { QueryResult } from 'pg';
+import { afterEach, describe, test } from 'mocha';
 import { UserDTO, UserRepository } from 'repositories/UserRepository';
 import { SinonStub, stub } from 'sinon';
 
@@ -14,85 +13,31 @@ describe('UserRepository Suite', () => {
     TYPES.UserRepository
   );
 
-  let queryStub: SinonStub;
+  let knexStub: SinonStub;
 
-  before(() => {
-    queryStub = stub(db, 'query');
-    queryStub
-      .withArgs(
-        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING "userID", username;',
-        ['username', 'password', 'salt']
-      )
-      .resolves(<QueryResult<Pick<UserDTO, 'userID' | 'username'>>>{
-        rows: [
+  afterEach(() => {
+    knexStub.restore();
+  });
+
+  test('create() : creates new user in users table', async () => {
+    knexStub = stub(knex, 'from').callsFake((): any => ({
+      insert: stub()
+        .withArgs({
+          username: 'username',
+          password: 'password',
+          salt: 'salt',
+        })
+        .returnsThis(),
+      returning: stub()
+        .withArgs(['userID', 'username'])
+        .resolves([
           {
             userID: 16,
             username: 'username',
           },
-        ],
-        rowCount: 1,
-      });
+        ]),
+    }));
 
-    queryStub
-      .withArgs(
-        'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING "userID", username;',
-        ['username', '', 'salt']
-      )
-      .resolves(<QueryResult<never>>{
-        rows: [],
-        rowCount: 0,
-      });
-
-    queryStub
-      .withArgs(
-        'SELECT "userID",username,password,salt FROM users WHERE username = $1;',
-        ['usernameExists']
-      )
-      .resolves(<QueryResult<UserDTO>>{
-        rows: [
-          {
-            userID: 16,
-            username: 'usernameExists',
-            password: 'mySecretPassword',
-            salt: 'mySecretSalt',
-          },
-        ],
-        rowCount: 1,
-      });
-
-    queryStub
-      .withArgs(
-        'SELECT "userID",username,password,salt FROM users WHERE username = $1;',
-        ['usernameDoesNotExist']
-      )
-      .resolves(<QueryResult<never>>{
-        rows: [],
-        rowCount: 0,
-      });
-
-    queryStub
-      .withArgs('SELECT COUNT(1) FROM users WHERE username = $1;', [
-        'usernameExists',
-      ])
-      .resolves(<QueryResult<{ count: 0 | 1 }>>{
-        rows: [{ count: 1 }],
-        rowCount: 1,
-      });
-
-    queryStub
-      .withArgs('SELECT COUNT(1) FROM users WHERE username = $1;', [
-        'usernameDoesNotExist',
-      ])
-      .resolves(<QueryResult<{ count: 0 | 1 }>>{
-        rows: [{ count: 0 }],
-        rowCount: 1,
-      });
-  });
-  after(() => {
-    queryStub.restore();
-  });
-
-  test('create() : creates new user in users table', async () => {
     expect(
       await userRepository.create('username', 'password', 'salt')
     ).to.be.deep.equal(<Pick<UserDTO, 'userID' | 'username'>>{
@@ -102,10 +47,36 @@ describe('UserRepository Suite', () => {
   });
 
   test('create() : cant create a new user in users table', async () => {
+    knexStub = stub(knex, 'from').callsFake((): any => ({
+      insert: stub()
+        .withArgs({
+          username: 'username',
+          password: '',
+          salt: 'salt',
+        })
+        .returnsThis(),
+      returning: stub().withArgs(['userID', 'username']).resolves(null),
+    }));
     expect(await userRepository.create('username', '', 'salt')).to.be.null;
   });
 
   test('read()   : finds user by the given username', async () => {
+    knexStub = stub(knex, 'from').callsFake((): any => ({
+      select: stub()
+        .withArgs('userID', 'username', 'password', 'salt')
+        .returnsThis(),
+      where: stub()
+        .withArgs({ username: 'usernameExists' })
+        .resolves([
+          {
+            userID: 16,
+            username: 'usernameExists',
+            password: 'mySecretPassword',
+            salt: 'mySecretSalt',
+          },
+        ]),
+    }));
+
     expect(await userRepository.read('usernameExists')).to.be.deep.equal(<
       UserDTO
     >{
@@ -117,14 +88,32 @@ describe('UserRepository Suite', () => {
   });
 
   test('read()   : does not find user by the given username', async () => {
+    knexStub = stub(knex, 'from').callsFake((): any => ({
+      select: stub()
+        .withArgs('userID', 'username', 'password', 'salt')
+        .returnsThis(),
+      where: stub().withArgs({ username: 'usernameDoesNotExist' }).resolves([]),
+    }));
     expect(await userRepository.read('usernameDoesNotExist')).to.be.null;
   });
 
   test('exists() : user exists by username', async () => {
+    knexStub = stub(knex, 'from').callsFake((): any => ({
+      count: stub().withArgs('username').returnsThis(),
+      where: stub()
+        .withArgs({ username: 'usernameExists' })
+        .resolves([{ count: 1 }]),
+    }));
     expect(await userRepository.exists('usernameExists')).to.be.true;
   });
 
   test('exists() : does not find user by the given username', async () => {
+    knexStub = stub(knex, 'from').callsFake((): any => ({
+      count: stub().withArgs('username').returnsThis(),
+      where: stub()
+        .withArgs({ username: 'usernameDoesNotExist' })
+        .resolves([{ count: 0 }]),
+    }));
     expect(await userRepository.exists('usernameDoesNotExist')).to.be.false;
   });
 });
