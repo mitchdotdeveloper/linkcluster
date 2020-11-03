@@ -15,11 +15,11 @@ export class AuthController implements RegistrableController {
   private userService!: UserService;
 
   public register(app: Application) {
-    const route = Router();
+    const authRouter = Router();
 
-    app.use('/auth', route);
+    app.use('/auth', authRouter);
 
-    route.post('/signup', async (req, res) => {
+    authRouter.post('/signup', async (req, res) => {
       const { username, password } = req.body as {
         username: string;
         password: string;
@@ -47,7 +47,7 @@ export class AuthController implements RegistrableController {
       return res.status(201).send({ username: user.getUsername() });
     });
 
-    route.post('/login', async (req, res) => {
+    authRouter.post('/login', async (req, res) => {
       const { session, body } = req;
       const { username, password } = body as {
         username: string;
@@ -71,7 +71,7 @@ export class AuthController implements RegistrableController {
       return res.status(200).send(stripSensitiveProperties(user));
     });
 
-    route.delete('/logout', async (req, res) => {
+    authRouter.delete('/logout', async (req, res) => {
       const { session, sessionID } = req;
       if (!session || !sessionID) return res.sendStatus(400);
 

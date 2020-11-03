@@ -13,12 +13,12 @@ export class UserController implements RegistrableController {
   private userService!: UserService;
 
   public register(app: Application) {
-    const route = Router();
+    const userRouter = Router();
 
-    app.use('/user', route);
+    app.use('/user', userRouter);
 
-    route.get('/', authenticate, async (req, res) => {
-      const { username } = req.query as Partial<UserDTO>;
+    userRouter.get('/', authenticate, async (req, res) => {
+      const { username } = req.query as Pick<UserDTO, 'username'>;
 
       if (!username) return res.sendStatus(400);
 

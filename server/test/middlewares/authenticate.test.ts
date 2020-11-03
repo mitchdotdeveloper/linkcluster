@@ -16,7 +16,7 @@ describe('middlewares/authenticate Suite', () => {
     next = () => {};
   });
 
-  test('authenticate() successfully passes request through', () => {
+  test('authenticate() : successfully passes request through', () => {
     req.session = { loggedIn: true };
     req.sessionID = 'sessionid';
     next = spy();
@@ -26,7 +26,7 @@ describe('middlewares/authenticate Suite', () => {
     expect((next as SinonSpy).called).to.be.true;
   });
 
-  test('authenticate() returns 403 as there was no session', () => {
+  test('authenticate() : returns 403 as there was no session', () => {
     req.session = undefined;
     req.sessionID = 'sessionid';
     res.sendStatus = spy();
@@ -36,7 +36,7 @@ describe('middlewares/authenticate Suite', () => {
     expect((res.sendStatus as SinonSpy).calledOnceWith(403)).to.be.true;
   });
 
-  test('authenticate() returns 403 as there was no sessionId', () => {
+  test('authenticate() : returns 403 as there was no sessionId', () => {
     req.session = {};
     req.sessionID = '';
     res.sendStatus = spy();
@@ -46,7 +46,7 @@ describe('middlewares/authenticate Suite', () => {
     expect((res.sendStatus as SinonSpy).calledOnceWith(403)).to.be.true;
   });
 
-  test('authenticate() returns 403 as the loggedIn key on the session object was false', () => {
+  test('authenticate() : returns 403 as the loggedIn key on the session object was false', () => {
     req.session = { loggedIn: false };
     req.sessionID = 'sessionId';
     res.sendStatus = spy();

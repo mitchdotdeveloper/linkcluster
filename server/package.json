@@ -7,6 +7,7 @@
     "dev": "nodemon -r dotenv/config -r ts-node src/index.ts",
     "dev:dockerup": "docker-compose up --build -d",
     "dev:dockerdown": "docker-compose down",
+    "db:schemadump": "pg_dump linkcluster -U postgres -t '{{table_name}}' --schema-only",
     "test": "mocha -r ts-node/register -r tsconfig-paths/register test/**/*.test.ts",
     "coverage": "nyc npm run test"
   },
@@ -15,6 +16,7 @@
     "connect-redis": "^5.0.0",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
+    "knex": "^0.21.12",
     "pg": "^8.4.1",
     "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13"

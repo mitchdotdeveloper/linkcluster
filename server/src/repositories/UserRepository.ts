@@ -1,7 +1,8 @@
 import { injectable } from 'inversify';
-import db from '../connectDB';
+import { knex } from '../connectDB';
 
 export type UserDTO = {
+  userID: number;
   username: string;
   password: string;
   salt: string;
@@ -12,42 +13,46 @@ export interface UserRepository {
     username: string,
     password: string,
     salt: string
-  ): Promise<Pick<UserDTO, 'username'> | null>;
+  ): Promise<Pick<UserDTO, 'userID' | 'username'> | null>;
   read(username: string): Promise<UserDTO | null>;
   exists(username: string): Promise<boolean>;
 }
 
 @injectable()
 export class UserRepositoryImpl implements UserRepository {
-  public async create(username: string, password: string, salt: string) {
-    const { rows, rowCount } = await db.query<Pick<UserDTO, 'username'>>(
-      'INSERT INTO users(username, password, salt) VALUES ($1, $2, $3) RETURNING username;',
-      [username, password, salt]
-    );
+  public async create(
+    username: string,
+    password: string,
+    salt: string
+  ): Promise<Pick<UserDTO, 'userID' | 'username'> | null> {
+    try {
+      const [user] = await knex
+        .from<UserDTO>('users')
+        .insert({ username, password, salt })
+        .returning(['userID', 'username']);
 
-    if (!rowCount) return null;
-
-    return rows[0];
+      return user;
+    } catch (err) {
+      return null;
+    }
   }
 
   public async read(username: string): Promise<UserDTO | null> {
-    const userFields: (keyof UserDTO)[] = ['username', 'password', 'salt'];
-    const user = await db.query<UserDTO>(
-      `SELECT ${userFields.toString()} FROM users WHERE username = $1;`,
-      [username]
-    );
+    const [user] = await knex
+      .from<UserDTO>('users')
+      .select('userID', 'username', 'password', 'salt')
+      .where({ username });
 
-    if (!user.rowCount) return null;
+    if (!user) return null;
 
-    return user.rows[0];
+    return user;
   }
 
   public async exists(username: string) {
-    const { rows } = await db.query<{ count: 0 | 1 }>(
-      'SELECT COUNT(1) FROM users WHERE username = $1;',
-      [username]
-    );
-    const { count } = rows[0];
+    const [{ count }] = await knex
+      .from<UserDTO>('users')
+      .count('username')
+      .where({ username });
 
     return +count === 1;
   }

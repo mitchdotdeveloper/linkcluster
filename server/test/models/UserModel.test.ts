@@ -4,7 +4,11 @@ import { expect } from 'chai';
 import { User } from 'models/UserModel';
 
 describe('UserModel Suite', () => {
-  const user: User = new User('myUsername', 'myPassword', 'mySalt');
+  const user: User = new User(16, 'myUsername', 'myPassword', 'mySalt');
+
+  test('getUserID()   : returns member userID', () => {
+    expect(user.getUserID()).to.be.equal(16);
+  });
 
   test('getUsername() : returns member username', () => {
     expect(user.getUsername()).to.be.equal('myUsername');
@@ -16,6 +20,10 @@ describe('UserModel Suite', () => {
 
   test('getSalt()     : returns member salt', () => {
     expect(user.getSalt()).to.be.equal('mySalt');
+  });
+
+  test('setUserID()   : sets member userID', () => {
+    expect(user.setUserID(15).getUserID()).to.be.equal(15);
   });
 
   test('setUsername() : sets member username', () => {
