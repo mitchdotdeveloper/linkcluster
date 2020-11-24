@@ -1,0 +1,29 @@
+name: test client
+
+on:
+  push:
+    branches: [develop, feature/*, refactor/*, task/*, bugfix/*, hotfix/*]
+    paths:
+      - "client/**"
+      - ".github/workflows/**"
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "client/**"
+      - ".github/workflows/**"
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: install dependencies
+        run: |
+          cd client/
+          npm ci
+      - name: starting tests
+        run: |
+          cd client/
+          npm run test --ci
