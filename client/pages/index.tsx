@@ -1,9 +1,9 @@
-type Type = {
-  url: {
-    asPath: string;
-  };
-};
+import { Hi } from 'components/Hi/Hi';
 
-const Index = (hi: Type) => <div>{hi.url.asPath}</div>;
+const Index = () => (
+  <div>
+    <Hi message="My name is Mitch!" />
+  </div>
+);
 
 export default Index;
