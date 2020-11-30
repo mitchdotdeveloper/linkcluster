@@ -1,4 +1,5 @@
 import { injectable, inject } from 'inversify';
+import { stripBlacklistedProperties } from '../utilities/filter';
 import TYPES from '../inversifyTypes';
 import { User } from '../models/UserModel';
 import { UserDTO, UserRepository } from '../repositories/UserRepository';
@@ -11,6 +12,7 @@ export interface UserService {
   ): Promise<User | null>;
   getUser(username: string): Promise<User | null>;
   userExists(username: string): Promise<boolean>;
+  scrub(user: User): void;
 }
 
 @injectable()
@@ -25,6 +27,15 @@ export class UserServiceImpl implements UserService {
       userDTO.password,
       userDTO.salt
     );
+  }
+
+  private toUserDTO(user: User) {
+    return {
+      userID: user.getUserID(),
+      username: user.getUsername(),
+      password: user.getPassword(),
+      salt: user.getSalt(),
+    } as UserDTO;
   }
 
   public async createUser(username: string, password: string, salt: string) {
@@ -49,5 +60,12 @@ export class UserServiceImpl implements UserService {
 
   public async userExists(username: string) {
     return this.userRepository.exists(username);
+  }
+
+  public scrub(user: User): Omit<UserDTO, 'password' | 'salt'> {
+    return stripBlacklistedProperties(this.toUserDTO(user), [
+      'password',
+      'salt',
+    ]);
   }
 }

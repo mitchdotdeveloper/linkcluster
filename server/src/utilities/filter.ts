@@ -1,4 +1,19 @@
-export const stripSensitiveProperties = <T>(obj: T) => {
+export const stripBlacklistedProperties = <T>(
+  obj: T,
+  blacklist: (keyof T)[]
+): Omit<T, keyof typeof blacklist> => {
+  const scrubbedUser: any = {};
+
+  for (const [key, value] of Object.entries(obj)) {
+    if (blacklist.includes(key as keyof T)) continue;
+
+    scrubbedUser[key] = value;
+  }
+
+  return scrubbedUser;
+};
+
+export const stripSensitiveProperties = <T>(obj: T): Partial<T> => {
   const newObj: any = {};
 
   for (const [key, value] of Object.entries(obj)) {
