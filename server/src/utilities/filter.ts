@@ -13,17 +13,6 @@ export const stripBlacklistedProperties = <T>(
   return scrubbedUser;
 };
 
-export const stripSensitiveProperties = <T>(obj: T): Partial<T> => {
-  const newObj: any = {};
-
-  for (const [key, value] of Object.entries(obj)) {
-    if (key.startsWith('_')) continue;
-    newObj[key] = value;
-  }
-
-  return newObj;
-};
-
 export const stripFalsyProperties = <T>(obj: T) => {
   const newObj: any = {};
 

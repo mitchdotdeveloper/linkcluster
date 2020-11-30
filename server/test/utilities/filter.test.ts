@@ -4,7 +4,6 @@ import {
   stripBlacklistedProperties,
   stripFalsyProperties,
   stripNullOrUndefinedProperties,
-  stripSensitiveProperties,
 } from 'utilities/filter';
 
 describe('utilities/filter Suite', () => {
@@ -22,20 +21,6 @@ describe('utilities/filter Suite', () => {
         'sensitiveProperty2',
       ])
     ).to.be.deep.equal({
-      nonSensitiveProperty1: true,
-      nonSensitiveProperty2: true,
-    });
-  });
-
-  test('stripSensitiveProperties()       : returns passed in object without keys prefixed with `_`', () => {
-    const startingObject = {
-      _sensitiveProperty1: true,
-      _sensitiveProperty2: true,
-      nonSensitiveProperty1: true,
-      nonSensitiveProperty2: true,
-    };
-
-    expect(stripSensitiveProperties(startingObject)).to.be.deep.equal({
       nonSensitiveProperty1: true,
       nonSensitiveProperty2: true,
     });
