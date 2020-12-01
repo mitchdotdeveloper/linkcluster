@@ -2,8 +2,7 @@ import { Application, Router } from 'express';
 import type { RegistrableController } from '../controllers/RegistrableController';
 import { inject, injectable } from 'inversify';
 import { authenticate } from '../middlewares/authenticate';
-import type { LinkDTO } from '../repositories/LinkRepository';
-import { LinkService } from 'services/LinkService';
+import { LinkService } from '../services/LinkService';
 import TYPES from '../inversifyTypes';
 
 @injectable()
@@ -12,19 +11,31 @@ export class LinkController implements RegistrableController {
   private linkService!: LinkService;
 
   public register(app: Application) {
-    const linkRouter = Router();
+    const linksRouter = Router();
 
-    app.use('/link', linkRouter);
+    app.use('/links', linksRouter);
 
-    linkRouter.post('/', authenticate, async (req, res) => {
-      const { userID, linkTitle, link } = req.body as Omit<LinkDTO, 'linkID'>;
+    linksRouter.get('/:userID', authenticate, async (req, res) => {
+      const { userID } = req.params;
+
+      if (!userID) return res.sendStatus(400);
+
+      const links = await this.linkService.getLinks(Number(userID));
+
+      if (!links) return res.sendStatus(404);
+
+      return res.status(200).send({ links });
+    });
+
+    linksRouter.post('/', authenticate, async (req, res) => {
+      const { userID, linkTitle, link } = req.body;
 
       if (!userID || !linkTitle || !link) return res.sendStatus(400);
 
       const createdLink = await this.linkService.createLink(
-        userID,
-        linkTitle,
-        link
+        Number(userID),
+        String(linkTitle),
+        String(link)
       );
 
       if (!createdLink) return res.sendStatus(500);
@@ -32,36 +43,20 @@ export class LinkController implements RegistrableController {
       return res.status(201).send(createdLink);
     });
 
-    linkRouter.patch('/', authenticate, async (req, res) => {
-      const { linkID, linkTitle, link } = req.body as Omit<LinkDTO, 'userID'>;
+    linksRouter.patch('/', authenticate, async (req, res) => {
+      const { linkID, linkTitle, link } = req.body;
 
       if (!linkID || (!linkTitle && !link)) return res.sendStatus(400);
 
       const updatedLink = await this.linkService.updateLink(
-        linkID,
-        linkTitle,
-        link
+        Number(linkID),
+        String(linkTitle),
+        String(link)
       );
 
       if (!updatedLink) return res.sendStatus(500);
 
       return res.status(200).send({ linkID: updatedLink.getLinkID() });
-    });
-
-    const linksRouter = Router();
-
-    app.use('/links', linksRouter);
-
-    linksRouter.get('/', authenticate, async (req, res) => {
-      const { userID } = (req.query as unknown) as Pick<LinkDTO, 'userID'>;
-
-      if (!userID) return res.sendStatus(400);
-
-      const links = await this.linkService.getLinks(userID);
-
-      if (!links) return res.sendStatus(404);
-
-      return res.status(200).send({ links });
     });
   }
 }

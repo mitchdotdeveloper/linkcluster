@@ -24,7 +24,7 @@
   "devDependencies": {
     "@types/chai": "^4.2.13",
     "@types/connect-redis": "0.0.14",
-    "@types/express": "^4.17.8",
+    "@types/express": "^4.17.9",
     "@types/express-session": "^1.17.0",
     "@types/mocha": "^8.0.3",
     "@types/node": "^14.11.8",
