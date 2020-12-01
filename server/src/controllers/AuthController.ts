@@ -4,7 +4,6 @@ import { inject, injectable } from 'inversify';
 import TYPES from '../inversifyTypes';
 import { AuthService } from '../services/AuthService';
 import { UserService } from '../services/UserService';
-import { stripSensitiveProperties } from '../utilities/filter';
 
 @injectable()
 export class AuthController implements RegistrableController {
@@ -68,7 +67,7 @@ export class AuthController implements RegistrableController {
       if (hashedPassword !== user.getPassword()) return res.sendStatus(403);
 
       if (session) session.loggedIn = true;
-      return res.status(200).send(stripSensitiveProperties(user));
+      return res.status(200).send(this.userService.scrub(user));
     });
 
     authRouter.delete('/logout', async (req, res) => {

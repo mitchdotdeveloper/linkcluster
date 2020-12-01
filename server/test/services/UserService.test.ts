@@ -39,8 +39,8 @@ describe('UserService Suite', () => {
     ).to.be.deep.equal(<OmitClassMethods<User>>{
       userID: 16,
       username: 'username',
-      _password: undefined,
-      _salt: undefined,
+      password: undefined,
+      salt: undefined,
     });
   });
 
@@ -82,8 +82,8 @@ describe('UserService Suite', () => {
     >{
       userID: 16,
       username: 'usernameExists',
-      _password: 'myPassword',
-      _salt: 'mySalt',
+      password: 'myPassword',
+      salt: 'mySalt',
     });
   });
 

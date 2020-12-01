@@ -4,7 +4,6 @@ import { injectable, inject } from 'inversify';
 import TYPES from '../inversifyTypes';
 import type { UserService } from 'services/UserService';
 import type { UserDTO } from 'repositories/UserRepository';
-import { stripSensitiveProperties } from '../utilities/filter';
 import { authenticate } from '../middlewares/authenticate';
 
 @injectable()
@@ -26,7 +25,7 @@ export class UserController implements RegistrableController {
 
       if (!user) return res.sendStatus(404);
 
-      return res.status(200).send(stripSensitiveProperties(user));
+      return res.status(200).send(this.userService.scrub(user));
     });
   }
 }

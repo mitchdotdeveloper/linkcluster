@@ -5,7 +5,6 @@ import { authenticate } from '../middlewares/authenticate';
 import type { LinkDTO } from '../repositories/LinkRepository';
 import { LinkService } from 'services/LinkService';
 import TYPES from '../inversifyTypes';
-import { stripSensitiveProperties } from '../utilities/filter';
 
 @injectable()
 export class LinkController implements RegistrableController {
@@ -30,7 +29,7 @@ export class LinkController implements RegistrableController {
 
       if (!createdLink) return res.sendStatus(500);
 
-      return res.status(201).send(stripSensitiveProperties(createdLink));
+      return res.status(201).send(createdLink);
     });
 
     linkRouter.patch('/', authenticate, async (req, res) => {

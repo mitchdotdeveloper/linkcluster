@@ -1,8 +1,8 @@
 export class User {
-  private userID: number;
+  public userID: number;
   private username: string;
-  private _password: string = '';
-  private _salt: string = '';
+  private password: string = '';
+  private salt: string = '';
 
   constructor(
     userID: number,
@@ -12,8 +12,8 @@ export class User {
   ) {
     this.userID = userID;
     this.username = username;
-    this._password = password;
-    this._salt = salt;
+    this.password = password;
+    this.salt = salt;
   }
 
   getUserID(): number {
@@ -25,11 +25,11 @@ export class User {
   }
 
   getPassword(): string {
-    return this._password;
+    return this.password;
   }
 
   getSalt(): string {
-    return this._salt;
+    return this.salt;
   }
 
   setUserID(userID: number) {
@@ -43,12 +43,12 @@ export class User {
   }
 
   setPassword(password: string) {
-    this._password = password;
+    this.password = password;
     return this;
   }
 
   setSalt(salt: string) {
-    this._salt = salt;
+    this.salt = salt;
     return this;
   }
 }
