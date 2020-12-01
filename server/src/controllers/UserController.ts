@@ -3,7 +3,6 @@ import type { RegistrableController } from '../controllers/RegistrableController
 import { injectable, inject } from 'inversify';
 import TYPES from '../inversifyTypes';
 import type { UserService } from 'services/UserService';
-import type { UserDTO } from 'repositories/UserRepository';
 import { authenticate } from '../middlewares/authenticate';
 
 @injectable()
@@ -12,12 +11,12 @@ export class UserController implements RegistrableController {
   private userService!: UserService;
 
   public register(app: Application) {
-    const userRouter = Router();
+    const usersRouter = Router();
 
-    app.use('/user', userRouter);
+    app.use('/users', usersRouter);
 
-    userRouter.get('/', authenticate, async (req, res) => {
-      const { username } = req.query as Pick<UserDTO, 'username'>;
+    usersRouter.get('/:username', authenticate, async (req, res) => {
+      const { username } = req.params;
 
       if (!username) return res.sendStatus(400);
 
