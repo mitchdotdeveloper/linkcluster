@@ -40,7 +40,7 @@ export class LinkController implements RegistrableController {
 
       if (!createdLink) return res.sendStatus(500);
 
-      return res.status(201).send(createdLink);
+      return res.status(201).send({ link: createdLink });
     });
 
     linksRouter.patch('/', authenticate, async (req, res) => {
