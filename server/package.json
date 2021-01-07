@@ -14,6 +14,7 @@
   "author": "Mitch O'Hair",
   "dependencies": {
     "connect-redis": "^5.0.0",
+    "cors": "^2.8.5",
     "express": "^4.17.1",
     "express-session": "^1.17.1",
     "knex": "^0.21.12",
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@types/chai": "^4.2.13",
     "@types/connect-redis": "0.0.14",
+    "@types/cors": "^2.8.8",
     "@types/express": "^4.17.9",
     "@types/express-session": "^1.17.0",
     "@types/mocha": "^8.0.3",
