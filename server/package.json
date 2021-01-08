@@ -2,7 +2,7 @@
   "name": "server",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc -b src",
+    "build": "tsc -b src && find ./dist -name '*.ts*' -delete",
     "watch": "npm run build -- -w",
     "dev": "nodemon -r dotenv/config -r ts-node src/index.ts",
     "dev:dockerup": "docker-compose up --build -d",
