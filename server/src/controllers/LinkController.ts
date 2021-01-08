@@ -1,7 +1,7 @@
 import { Application, Router } from 'express';
 import type { RegistrableController } from '../controllers/RegistrableController';
 import { inject, injectable } from 'inversify';
-import { authenticate } from '../middlewares/authenticate';
+import { authenticateJWT } from '../middlewares/authenticate';
 import { LinkService } from '../services/LinkService';
 import TYPES from '../inversifyTypes';
 
@@ -15,7 +15,7 @@ export class LinkController implements RegistrableController {
 
     app.use('/links', linksRouter);
 
-    linksRouter.get('/:userID', authenticate, async (req, res) => {
+    linksRouter.get('/:userID', authenticateJWT, async (req, res) => {
       const { userID } = req.params;
 
       if (!userID) return res.sendStatus(400);
@@ -27,7 +27,7 @@ export class LinkController implements RegistrableController {
       return res.status(200).send({ links });
     });
 
-    linksRouter.post('/', authenticate, async (req, res) => {
+    linksRouter.post('/', authenticateJWT, async (req, res) => {
       const { userID, linkTitle, link } = req.body;
 
       if (!userID || !linkTitle || !link) return res.sendStatus(400);
@@ -43,7 +43,7 @@ export class LinkController implements RegistrableController {
       return res.status(201).send({ link: createdLink });
     });
 
-    linksRouter.patch('/', authenticate, async (req, res) => {
+    linksRouter.patch('/', authenticateJWT, async (req, res) => {
       const { linkID, linkTitle, link } = req.body;
 
       if (!linkID || (!linkTitle && !link)) return res.sendStatus(400);

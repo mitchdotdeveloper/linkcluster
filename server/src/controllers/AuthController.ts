@@ -1,4 +1,6 @@
 import { Application, Router } from 'express';
+import { sign } from 'jsonwebtoken';
+import { v4 } from 'uuid';
 import { RegistrableController } from '../controllers/RegistrableController';
 import { inject, injectable } from 'inversify';
 import TYPES from '../inversifyTypes';
@@ -35,10 +37,12 @@ export class AuthController implements RegistrableController {
         salt,
       } = await this.authService.hashAndSaltPassword(password);
 
+      const refreshToken = v4();
       const user = await this.userService.createUser(
         username,
         hashedPassword,
-        salt
+        salt,
+        refreshToken
       );
 
       if (!user) return res.sendStatus(500);
@@ -47,7 +51,7 @@ export class AuthController implements RegistrableController {
     });
 
     authRouter.post('/login', async (req, res) => {
-      const { session, body } = req;
+      const { body } = req;
       const { username, password } = body as {
         username: string;
         password: string;
@@ -66,21 +70,23 @@ export class AuthController implements RegistrableController {
 
       if (hashedPassword !== user.getPassword()) return res.sendStatus(403);
 
-      if (session) session.loggedIn = true;
-      return res.status(200).send(this.userService.scrub(user));
-    });
-
-    authRouter.delete('/logout', async (req, res) => {
-      const { session, sessionID } = req;
-      if (!session || !sessionID) return res.sendStatus(400);
-
-      session.loggedIn = false;
-      session.destroy((err) => {
-        if (err) return res.sendStatus(500);
-
-        res.clearCookie('sessionId');
-        res.sendStatus(200);
-      });
+      const jwt = sign(
+        { username: user.getUsername() },
+        process.env.JWT_SECRET!,
+        {
+          algorithm: 'HS256',
+          // expiresIn: '1 day',
+        }
+      );
+      res.setHeader('Authorization', `Bearer ${jwt}`);
+      return res
+        .cookie('refreshtoken', user.getRefreshToken(), {
+          httpOnly: true,
+          secure: false,
+          maxAge: 1000 * 60 * 1440,
+        })
+        .status(200)
+        .send(this.userService.scrub(user));
     });
   }
 }

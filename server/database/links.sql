@@ -82,4 +82,3 @@ ALTER TABLE ONLY public.links
 --
 -- PostgreSQL database dump complete
 --
-

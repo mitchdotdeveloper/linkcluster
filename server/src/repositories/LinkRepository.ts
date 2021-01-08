@@ -47,7 +47,7 @@ export class LinkRepositoryImpl implements LinkRepository {
   }
 
   public async update(
-    linkObj: Omit<LinkDTO, 'userID'>
+    linkObj: Partial<Omit<LinkDTO, 'userID'>>
   ): Promise<LinkDTO['linkID'] | null> {
     const [linkID] = await knex
       .from<LinkDTO>('links')

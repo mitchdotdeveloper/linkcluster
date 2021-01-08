@@ -1,13 +1,22 @@
 import type { NextFunction, Request, Response } from 'express';
+import { verify } from 'jsonwebtoken';
 
-export const authenticate = async (
+export const authenticateJWT = async (
   req: Request,
   res: Response,
   next: NextFunction
 ) => {
-  const { session, sessionID } = req;
+  const bearerAuthHeader = req.headers.authorization;
 
-  if (!session || !sessionID || !session.loggedIn) return res.sendStatus(403);
+  if (!bearerAuthHeader?.startsWith('Bearer ')) return res.sendStatus(403);
 
-  next();
+  const token = bearerAuthHeader.slice(7);
+
+  if (!token) return res.sendStatus(403);
+
+  verify(token, process.env.JWT_SECRET as string, (err, decoded) => {
+    if (err || !decoded) return res.sendStatus(403);
+
+    next();
+  });
 };

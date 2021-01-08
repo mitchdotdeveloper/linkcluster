@@ -3,55 +3,46 @@ import { afterEach, describe, test } from 'mocha';
 import { expect } from 'chai';
 import { SinonSpy, spy } from 'sinon';
 import type { Request, Response, NextFunction } from 'express';
-import { authenticate } from 'middlewares/authenticate';
+import { authenticateJWT } from 'middlewares/authenticate';
 
 describe('middlewares/authenticate Suite', () => {
-  let req: any = {};
+  process.env.JWT_SECRET =
+    'be3a717845b086a0d1af87f196ed02b1be189b0b6f356cfae0405471fc43ebb2';
+  let req: any = { headers: {} };
   let res: any = {};
   let next = () => {};
 
   afterEach(() => {
-    req = {};
+    req = { headers: {} };
     res = {};
     next = () => {};
   });
 
-  test('authenticate() : successfully passes request through', () => {
-    req.session = { loggedIn: true };
-    req.sessionID = 'sessionid';
+  test('authenticateJWT() : successfully passes request through', () => {
+    req.headers.authorization =
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pdGNoIiwiaWF0IjoxNjEwMDcyMTUyfQ.zurbENyOPyF0hJSfFBtnfLxeZ9daFm4rvmvnn6oVaGc';
     next = spy();
 
-    authenticate(req as Request, res as Response, next as NextFunction);
+    authenticateJWT(req as Request, res as Response, next as NextFunction);
 
     expect((next as SinonSpy).called).to.be.true;
   });
 
-  test('authenticate() : returns 403 as there was no session', () => {
-    req.session = undefined;
-    req.sessionID = 'sessionid';
+  test('authenticateJWT() : returns 403 as there was no JWT', () => {
+    req.headers.authorization = '';
     res.sendStatus = spy();
 
-    authenticate(req as Request, res as Response, next as NextFunction);
+    authenticateJWT(req as Request, res as Response, next as NextFunction);
 
     expect((res.sendStatus as SinonSpy).calledOnceWith(403)).to.be.true;
   });
 
-  test('authenticate() : returns 403 as there was no sessionId', () => {
-    req.session = {};
-    req.sessionID = '';
+  test('authenticateJWT() : returns 403 as there was an invalid JWT', () => {
+    req.headers.authorization =
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pdGNoIiwiaWF0IjoxNjEwMDcyMzM2LCJleHAiOjE2MTAwNzIzMzd9.6vc7Ft8af9dePYwy9WmbYrfAoFFJTCzfdOHuSMHiXiY';
     res.sendStatus = spy();
 
-    authenticate(req as Request, res as Response, next as NextFunction);
-
-    expect((res.sendStatus as SinonSpy).calledOnceWith(403)).to.be.true;
-  });
-
-  test('authenticate() : returns 403 as the loggedIn key on the session object was false', () => {
-    req.session = { loggedIn: false };
-    req.sessionID = 'sessionId';
-    res.sendStatus = spy();
-
-    authenticate(req as Request, res as Response, next as NextFunction);
+    authenticateJWT(req as Request, res as Response, next as NextFunction);
 
     expect((res.sendStatus as SinonSpy).calledOnceWith(403)).to.be.true;
   });

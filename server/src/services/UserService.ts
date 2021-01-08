@@ -8,7 +8,8 @@ export interface UserService {
   createUser(
     username: string,
     password: string,
-    salt: string
+    salt: string,
+    refreshToken: string
   ): Promise<User | null>;
   getUser(username: string): Promise<User | null>;
   userExists(username: string): Promise<boolean>;
@@ -25,7 +26,8 @@ export class UserServiceImpl implements UserService {
       userDTO.userID,
       userDTO.username,
       userDTO.password,
-      userDTO.salt
+      userDTO.salt,
+      userDTO.refreshToken
     );
   }
 
@@ -35,14 +37,21 @@ export class UserServiceImpl implements UserService {
       username: user.getUsername(),
       password: user.getPassword(),
       salt: user.getSalt(),
+      refreshToken: user.getRefreshToken(),
     } as UserDTO;
   }
 
-  public async createUser(username: string, password: string, salt: string) {
+  public async createUser(
+    username: string,
+    password: string,
+    salt: string,
+    refreshToken: string
+  ) {
     const userWasCreated = await this.userRepository.create(
       username,
       password,
-      salt
+      salt,
+      refreshToken
     );
 
     if (!userWasCreated) return null;
@@ -62,10 +71,13 @@ export class UserServiceImpl implements UserService {
     return this.userRepository.exists(username);
   }
 
-  public scrub(user: User): Omit<UserDTO, 'password' | 'salt'> {
+  public scrub(
+    user: User
+  ): Omit<UserDTO, 'password' | 'salt' | 'refreshToken'> {
     return stripBlacklistedProperties(this.toUserDTO(user), [
       'password',
       'salt',
+      'refreshToken',
     ]);
   }
 }

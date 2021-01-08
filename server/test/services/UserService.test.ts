@@ -24,7 +24,12 @@ describe('UserService Suite', () => {
     container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
       UserRepository
     >{
-      create: (_username: string, _password: string, _salt: string) =>
+      create: (
+        _username: string,
+        _password: string,
+        _salt: string,
+        _refreshToken: string
+      ) =>
         Promise.resolve<Pick<UserDTO, 'userID' | 'username'>>({
           userID: 16,
           username: 'username',
@@ -35,12 +40,15 @@ describe('UserService Suite', () => {
     );
 
     expect(
-      await userService.createUser('username', 'password', 'salt')
+      await userService.createUser(
+        'username',
+        'password',
+        'salt',
+        '1616967e-217d-4f31-a108-0335ec0d79d7'
+      )
     ).to.be.deep.equal(<OmitClassMethods<User>>{
       userID: 16,
       username: 'username',
-      password: undefined,
-      salt: undefined,
     });
   });
 
@@ -48,14 +56,25 @@ describe('UserService Suite', () => {
     container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
       UserRepository
     >{
-      create: (_username: string, _password: string, _salt: string) =>
-        Promise.resolve(null),
+      create: (
+        _username: string,
+        _password: string,
+        _salt: string,
+        _refreshToken: string
+      ) => Promise.resolve(null),
     });
     const userService: UserService = container.get<UserService>(
       TYPES.UserService
     );
 
-    expect(await userService.createUser('username', '', 'salt')).to.be.null;
+    expect(
+      await userService.createUser(
+        'username',
+        '',
+        'salt',
+        '1616967e-217d-4f31-a108-0335ec0d79d7'
+      )
+    ).to.be.null;
   });
 
   test('getUser()    : gets user by given username', async () => {
@@ -71,6 +90,7 @@ describe('UserService Suite', () => {
               : 'usernameDoesNotExist',
           password: 'myPassword',
           salt: 'mySalt',
+          refreshToken: '1616967e-217d-4f31-a108-0335ec0d79d7',
         }),
     });
     const userService: UserService = container.get<UserService>(
@@ -84,6 +104,7 @@ describe('UserService Suite', () => {
       username: 'usernameExists',
       password: 'myPassword',
       salt: 'mySalt',
+      refreshToken: '1616967e-217d-4f31-a108-0335ec0d79d7',
     });
   });
 

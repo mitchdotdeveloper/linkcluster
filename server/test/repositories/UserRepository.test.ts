@@ -26,6 +26,7 @@ describe('UserRepository Suite', () => {
           username: 'username',
           password: 'password',
           salt: 'salt',
+          refreshToken: '1616967e-217d-4f31-a108-0335ec0d79d7',
         })
         .returnsThis(),
       returning: stub()
@@ -39,7 +40,12 @@ describe('UserRepository Suite', () => {
     }));
 
     expect(
-      await userRepository.create('username', 'password', 'salt')
+      await userRepository.create(
+        'username',
+        'password',
+        'salt',
+        '1616967e-217d-4f31-a108-0335ec0d79d7'
+      )
     ).to.be.deep.equal(<Pick<UserDTO, 'userID' | 'username'>>{
       userID: 16,
       username: 'username',
@@ -53,17 +59,25 @@ describe('UserRepository Suite', () => {
           username: 'username',
           password: '',
           salt: 'salt',
+          refreshToken: '1616967e-217d-4f31-a108-0335ec0d79d7',
         })
         .returnsThis(),
       returning: stub().withArgs(['userID', 'username']).resolves(null),
     }));
-    expect(await userRepository.create('username', '', 'salt')).to.be.null;
+    expect(
+      await userRepository.create(
+        'username',
+        '',
+        'salt',
+        '1616967e-217d-4f31-a108-0335ec0d79d7'
+      )
+    ).to.be.null;
   });
 
   test('read()   : finds user by the given username', async () => {
     knexStub = stub(knex, 'from').callsFake((): any => ({
       select: stub()
-        .withArgs('userID', 'username', 'password', 'salt')
+        .withArgs('userID', 'username', 'password', 'salt', 'refreshToken')
         .returnsThis(),
       where: stub()
         .withArgs({ username: 'usernameExists' })
@@ -73,6 +87,7 @@ describe('UserRepository Suite', () => {
             username: 'usernameExists',
             password: 'mySecretPassword',
             salt: 'mySecretSalt',
+            refreshToken: '1616967e-217d-4f31-a108-0335ec0d79d7',
           },
         ]),
     }));
@@ -84,13 +99,14 @@ describe('UserRepository Suite', () => {
       username: 'usernameExists',
       password: 'mySecretPassword',
       salt: 'mySecretSalt',
+      refreshToken: '1616967e-217d-4f31-a108-0335ec0d79d7',
     });
   });
 
   test('read()   : does not find user by the given username', async () => {
     knexStub = stub(knex, 'from').callsFake((): any => ({
       select: stub()
-        .withArgs('userID', 'username', 'password', 'salt')
+        .withArgs('userID', 'username', 'password', 'salt', 'refreshToken')
         .returnsThis(),
       where: stub().withArgs({ username: 'usernameDoesNotExist' }).resolves([]),
     }));
