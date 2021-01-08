@@ -24,7 +24,9 @@ export class LinkController implements RegistrableController {
 
       if (!links) return res.sendStatus(404);
 
-      return res.status(200).send({ links });
+      res.status(200);
+
+      return res.send({ links });
     });
 
     linksRouter.post('/', authenticateJWT, async (req, res) => {
@@ -40,7 +42,9 @@ export class LinkController implements RegistrableController {
 
       if (!createdLink) return res.sendStatus(500);
 
-      return res.status(201).send({ link: createdLink });
+      res.status(201);
+
+      return res.send({ link: createdLink });
     });
 
     linksRouter.patch('/', authenticateJWT, async (req, res) => {
@@ -56,7 +60,9 @@ export class LinkController implements RegistrableController {
 
       if (!updatedLink) return res.sendStatus(500);
 
-      return res.status(200).send({ linkID: updatedLink.getLinkID() });
+      res.status(200);
+
+      return res.send({ linkID: updatedLink.getLinkID() });
     });
   }
 }

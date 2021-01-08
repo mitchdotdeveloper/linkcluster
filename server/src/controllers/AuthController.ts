@@ -1,6 +1,4 @@
 import { Application, Router } from 'express';
-import { sign } from 'jsonwebtoken';
-import { v4 } from 'uuid';
 import { RegistrableController } from '../controllers/RegistrableController';
 import { inject, injectable } from 'inversify';
 import TYPES from '../inversifyTypes';
@@ -37,7 +35,8 @@ export class AuthController implements RegistrableController {
         salt,
       } = await this.authService.hashAndSaltPassword(password);
 
-      const refreshToken = v4();
+      const refreshToken = this.authService.generateRefreshToken();
+
       const user = await this.userService.createUser(
         username,
         hashedPassword,
@@ -47,7 +46,9 @@ export class AuthController implements RegistrableController {
 
       if (!user) return res.sendStatus(500);
 
-      return res.status(201).send({ username: user.getUsername() });
+      res.status(201);
+
+      return res.send({ username: user.getUsername() });
     });
 
     authRouter.post('/login', async (req, res) => {
@@ -70,23 +71,17 @@ export class AuthController implements RegistrableController {
 
       if (hashedPassword !== user.getPassword()) return res.sendStatus(403);
 
-      const jwt = sign(
-        { username: user.getUsername() },
-        process.env.JWT_SECRET!,
-        {
-          algorithm: 'HS256',
-          // expiresIn: '1 day',
-        }
-      );
+      const jwt = this.authService.signJWT(user.getUsername());
+
       res.setHeader('Authorization', `Bearer ${jwt}`);
-      return res
-        .cookie('refreshtoken', user.getRefreshToken(), {
-          httpOnly: true,
-          secure: false,
-          maxAge: 1000 * 60 * 1440,
-        })
-        .status(200)
-        .send(this.userService.scrub(user));
+      res.cookie('refreshtoken', user.getRefreshToken(), {
+        httpOnly: true,
+        secure: false,
+        maxAge: 1000 * 60 * 1440,
+      });
+      res.status(200);
+
+      return res.send(this.userService.scrub(user));
     });
   }
 }

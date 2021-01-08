@@ -24,7 +24,9 @@ export class UserController implements RegistrableController {
 
       if (!user) return res.sendStatus(404);
 
-      return res.status(200).send({ user: this.userService.scrub(user) });
+      res.status(200);
+
+      return res.send({ user: this.userService.scrub(user) });
     });
   }
 }
