@@ -38,6 +38,7 @@ describe('LinkService Suite', () => {
     expect(
       await linkService.createLink(16, 'myLink', 'www.google.com')
     ).to.be.deep.equal(<OmitClassMethods<Link>>{
+      userID: undefined,
       linkID: 1,
       linkTitle: 'myLink',
       link: 'www.google.com',
@@ -73,7 +74,10 @@ describe('LinkService Suite', () => {
     expect(
       await linkService.updateLink(16, 'myNewLinkTitle', 'www.google.com')
     ).to.be.deep.equal(<OmitClassMethods<Link>>{
+      userID: undefined,
       linkID: 1,
+      linkTitle: undefined,
+      link: undefined,
     });
   });
 
@@ -97,7 +101,7 @@ describe('LinkService Suite', () => {
     ).to.be.null;
   });
 
-  test('getLinks() : get all link with given userID', async () => {
+  test('getLinks()   : get all link with given userID', async () => {
     container.bind<LinkRepository>(TYPES.LinkRepository).toConstantValue(<
       LinkRepository
     >{
@@ -125,7 +129,7 @@ describe('LinkService Suite', () => {
     ]);
   });
 
-  test("getLinks() : doesn't get links as user does not have any", async () => {
+  test("getLinks()   : doesn't get links as user does not have any", async () => {
     container.bind<LinkRepository>(TYPES.LinkRepository).toConstantValue(<
       LinkRepository
     >{

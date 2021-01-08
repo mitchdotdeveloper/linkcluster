@@ -49,6 +49,9 @@ describe('UserService Suite', () => {
     ).to.be.deep.equal(<OmitClassMethods<User>>{
       userID: 16,
       username: 'username',
+      password: undefined,
+      salt: undefined,
+      refreshToken: undefined,
     });
   });
 
