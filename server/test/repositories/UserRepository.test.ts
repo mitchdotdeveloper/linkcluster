@@ -132,4 +132,24 @@ describe('UserRepository Suite', () => {
     }));
     expect(await userRepository.exists('usernameDoesNotExist')).to.be.false;
   });
+
+  test('update() : updates information for given fields on user with given userID', async () => {
+    knexStub = stub(knex, 'from').callsFake((): any => ({
+      update: stub()
+        .withArgs({
+          userID: 16,
+          refreshToken: 'a-refresh-token',
+        })
+        .returnsThis(),
+      where: stub().withArgs({ userID: 16 }).returnsThis(),
+      returning: stub().withArgs('userID').resolves([16]),
+    }));
+
+    expect(
+      await userRepository.update({
+        userID: 16,
+        refreshToken: 'a-refresh-token',
+      })
+    ).to.be.deep.equal(<UserDTO['userID']>16);
+  });
 });

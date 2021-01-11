@@ -8,7 +8,7 @@ import { expect } from 'chai';
 import { verify } from 'jsonwebtoken';
 
 describe('AuthService Suite', () => {
-  test('hashAndSaltPassword() : creates hashed password and salt', async () => {
+  test('hashAndSaltPassword()  : creates hashed password and salt', async () => {
     const authService: AuthService = container.get<AuthService>(
       TYPES.AuthService
     );
@@ -19,7 +19,7 @@ describe('AuthService Suite', () => {
     ]);
   });
 
-  test('hashAndSaltPassword() : creates idempotent hashed password when a salt argument is passed', async () => {
+  test('hashAndSaltPassword()  : creates idempotent hashed password when a salt argument is passed', async () => {
     const authService: AuthService = container.get<AuthService>(
       TYPES.AuthService
     );
@@ -33,7 +33,7 @@ describe('AuthService Suite', () => {
     ).to.be.deep.equal({ hashedPassword, salt });
   });
 
-  test('signJWT() : creates new JWT with username', async () => {
+  test('signJWT()              : creates new JWT with username', async () => {
     process.env.JWT_SECRET =
       'be3a717845b086a0d1af87f196ed02b1be189b0b6f356cfae0405471fc43ebb2';
     const authService: AuthService = container.get<AuthService>(

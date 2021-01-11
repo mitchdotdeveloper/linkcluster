@@ -4,6 +4,7 @@ import { inject, injectable } from 'inversify';
 import TYPES from '../inversifyTypes';
 import { AuthService } from '../services/AuthService';
 import { UserService } from '../services/UserService';
+import { authenticateJWTRefresh } from '../middlewares/authenticate';
 
 @injectable()
 export class AuthController implements RegistrableController {
@@ -46,9 +47,17 @@ export class AuthController implements RegistrableController {
 
       if (!user) return res.sendStatus(500);
 
+      const jwt = this.authService.signJWT(user.getUsername());
+
+      res.setHeader('Authorization', `Bearer ${jwt}`);
+      res.cookie('refreshtoken', refreshToken, {
+        httpOnly: true,
+        secure: false,
+        maxAge: 1000 * 60 * 1440,
+      });
       res.status(201);
 
-      return res.send({ username: user.getUsername() });
+      return res.send(this.userService.scrub(user));
     });
 
     authRouter.post('/login', async (req, res) => {
@@ -82,6 +91,49 @@ export class AuthController implements RegistrableController {
       res.status(200);
 
       return res.send(this.userService.scrub(user));
+    });
+
+    authRouter.delete('/logout', async (req, res) => {
+      const { userID } = req.body as { userID: number };
+
+      if (!userID) return res.sendStatus(400);
+
+      const refreshToken = this.authService.generateRefreshToken();
+
+      const user = await this.userService.updateUser({ userID, refreshToken });
+
+      if (!user) return res.sendStatus(500);
+
+      res.sendStatus(204);
+    });
+
+    authRouter.post('/refresh', authenticateJWTRefresh, async (req, res) => {
+      const { username } = req.body as { username: string };
+      const refreshToken = req.headers.cookie?.slice(13);
+
+      if (!username) return res.sendStatus(400);
+
+      const user = await this.userService.getUser(username);
+
+      if (!user) return res.sendStatus(500);
+
+      if (user.getRefreshToken() !== refreshToken) {
+        user.setRefreshToken(this.authService.generateRefreshToken());
+
+        await this.userService.updateUser(this.userService.toUserDTO(user));
+
+        res.clearCookie('refreshtoken', { httpOnly: true, secure: false });
+
+        return res.sendStatus(403);
+      }
+
+      const jwt = this.authService.signJWT(username);
+
+      if (!jwt) return res.sendStatus(500);
+
+      res.status(201);
+
+      return res.send({ jwt });
     });
   }
 }

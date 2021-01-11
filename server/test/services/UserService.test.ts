@@ -152,4 +152,44 @@ describe('UserService Suite', () => {
 
     expect(await userService.userExists('usernameDoesNotExist')).to.be.false;
   });
+
+  test('updateUser() : update user with given userID', async () => {
+    container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
+      UserRepository
+    >{
+      update: (_userObj: Partial<UserDTO>) =>
+        Promise.resolve<UserDTO['userID']>(1),
+    });
+    const userService: UserService = container.get<UserService>(
+      TYPES.UserService
+    );
+
+    expect(
+      await userService.updateUser({
+        userID: 1,
+        refreshToken: 'my-refresh-token',
+      })
+    ).to.be.deep.equal(<OmitClassMethods<User>>{
+      userID: 1,
+      username: undefined,
+      password: undefined,
+      salt: undefined,
+      refreshToken: undefined,
+    });
+  });
+
+  test("updateUser() : doesn't update user as userID was not available", async () => {
+    container
+      .bind<UserRepository>(TYPES.UserRepository)
+      .toConstantValue(<UserRepository>{});
+    const userService: UserService = container.get<UserService>(
+      TYPES.UserService
+    );
+
+    expect(
+      await userService.updateUser({
+        userID: (undefined as unknown) as number,
+      })
+    ).to.be.null;
+  });
 });

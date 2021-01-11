@@ -5,6 +5,8 @@ import { User } from '../models/UserModel';
 import { UserDTO, UserRepository } from '../repositories/UserRepository';
 
 export interface UserService {
+  toUser(userDTO: UserDTO): User;
+  toUserDTO(user: User): UserDTO;
   createUser(
     username: string,
     password: string,
@@ -13,6 +15,7 @@ export interface UserService {
   ): Promise<User | null>;
   getUser(username: string): Promise<User | null>;
   userExists(username: string): Promise<boolean>;
+  updateUser(user: Partial<UserDTO>): Promise<User | null>;
   scrub(user: User): void;
 }
 
@@ -21,7 +24,7 @@ export class UserServiceImpl implements UserService {
   @inject(TYPES.UserRepository)
   private userRepository!: UserRepository;
 
-  private toUser(userDTO: UserDTO) {
+  public toUser(userDTO: UserDTO) {
     return new User(
       userDTO.userID,
       userDTO.username,
@@ -31,7 +34,7 @@ export class UserServiceImpl implements UserService {
     );
   }
 
-  private toUserDTO(user: User) {
+  public toUserDTO(user: User) {
     return {
       userID: user.getUserID(),
       username: user.getUsername(),
@@ -69,6 +72,16 @@ export class UserServiceImpl implements UserService {
 
   public async userExists(username: string) {
     return this.userRepository.exists(username);
+  }
+
+  public async updateUser(user: Partial<UserDTO>) {
+    if (!user.userID) return null;
+
+    const userID = await this.userRepository.update(user);
+
+    if (!userID) return null;
+
+    return this.toUser({ userID } as UserDTO);
   }
 
   public scrub(

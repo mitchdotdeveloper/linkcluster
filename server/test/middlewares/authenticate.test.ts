@@ -3,7 +3,10 @@ import { afterEach, describe, test } from 'mocha';
 import { expect } from 'chai';
 import { SinonSpy, spy } from 'sinon';
 import type { Request, Response, NextFunction } from 'express';
-import { authenticateJWT } from 'middlewares/authenticate';
+import {
+  authenticateJWT,
+  authenticateJWTRefresh,
+} from 'middlewares/authenticate';
 
 describe('middlewares/authenticate Suite', () => {
   process.env.JWT_SECRET =
@@ -18,7 +21,7 @@ describe('middlewares/authenticate Suite', () => {
     next = () => {};
   });
 
-  test('authenticateJWT() : successfully passes request through', () => {
+  test('authenticateJWT()      : successfully passes request through', () => {
     req.headers.authorization =
       'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pdGNoIiwiaWF0IjoxNjEwMDcyMTUyfQ.zurbENyOPyF0hJSfFBtnfLxeZ9daFm4rvmvnn6oVaGc';
     next = spy();
@@ -28,8 +31,18 @@ describe('middlewares/authenticate Suite', () => {
     expect((next as SinonSpy).called).to.be.true;
   });
 
-  test('authenticateJWT() : returns 403 as there was no JWT', () => {
+  test('authenticateJWT()      : returns 400 as there was no JWT', () => {
     req.headers.authorization = '';
+    res.sendStatus = spy();
+
+    authenticateJWT(req as Request, res as Response, next as NextFunction);
+
+    expect((res.sendStatus as SinonSpy).calledOnceWith(400)).to.be.true;
+  });
+
+  test('authenticateJWT()      : returns 403 as there was an invalid JWT', () => {
+    req.headers.authorization =
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pdGNoIiwiaWF0IjoxNjEwMDcyMzM2LCJleHAiOjE2MTAwNzIzMzd9.6vc7Ft8af9dePYwy9WmbYrfAoFFJTCzfdOHuSMHiXiY';
     res.sendStatus = spy();
 
     authenticateJWT(req as Request, res as Response, next as NextFunction);
@@ -37,12 +50,47 @@ describe('middlewares/authenticate Suite', () => {
     expect((res.sendStatus as SinonSpy).calledOnceWith(403)).to.be.true;
   });
 
-  test('authenticateJWT() : returns 403 as there was an invalid JWT', () => {
+  test('authenticateJWTRefresh() : successfully passes request through', () => {
     req.headers.authorization =
-      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pdGNoIiwiaWF0IjoxNjEwMDcyMzM2LCJleHAiOjE2MTAwNzIzMzd9.6vc7Ft8af9dePYwy9WmbYrfAoFFJTCzfdOHuSMHiXiY';
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VybmFtZSI6Im1pdGNoIiwiaWF0IjoxNjEwMDcyMTUyfQ.zurbENyOPyF0hJSfFBtnfLxeZ9daFm4rvmvnn6oVaGc';
+    req.headers.cookie = 'refreshtoken=my-refresh-token';
+
+    next = spy();
+
+    authenticateJWTRefresh(
+      req as Request,
+      res as Response,
+      next as NextFunction
+    );
+
+    expect((next as SinonSpy).called).to.be.true;
+  });
+
+  test('authenticateJWTRefresh() : returns 400 as there was no JWT or refreshToken', () => {
+    req.headers.authorization = '';
+    req.headers.cookie = '';
     res.sendStatus = spy();
 
-    authenticateJWT(req as Request, res as Response, next as NextFunction);
+    authenticateJWTRefresh(
+      req as Request,
+      res as Response,
+      next as NextFunction
+    );
+
+    expect((res.sendStatus as SinonSpy).calledOnceWith(400)).to.be.true;
+  });
+
+  test('authenticateJWTRefresh() : returns 403 as there was an invalid JWT', () => {
+    req.headers.authorization =
+      'Bearer eyJhbGciOiJIUzI1NiIsInR5cCIXVCJ9.eyJ1c2VybmFtZSI6Im1pdGNoIiwiaWF0IjoxNjEwMDcyMzM2LCJleHAiOjE2MTAwNzIzMzd9.6vc7Ft8af9dePYwy9WmbYrfAoFFJTCzfdOHuSMHiXiY';
+    req.headers.cookie = 'refreshtoken=my-refresh-token';
+    res.sendStatus = spy();
+
+    authenticateJWTRefresh(
+      req as Request,
+      res as Response,
+      next as NextFunction
+    );
 
     expect((res.sendStatus as SinonSpy).calledOnceWith(403)).to.be.true;
   });

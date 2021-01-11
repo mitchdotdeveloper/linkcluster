@@ -18,6 +18,7 @@ export interface UserRepository {
   ): Promise<Pick<UserDTO, 'userID' | 'username'> | null>;
   read(username: string): Promise<UserDTO | null>;
   exists(username: string): Promise<boolean>;
+  update(userObj: Partial<UserDTO>): Promise<UserDTO['userID'] | null>;
 }
 
 @injectable()
@@ -58,5 +59,21 @@ export class UserRepositoryImpl implements UserRepository {
       .where({ username });
 
     return +count === 1;
+  }
+
+  public async update(
+    userObj: Partial<UserDTO>
+  ): Promise<UserDTO['userID'] | null> {
+    const { userID: id, ...user } = userObj;
+
+    const [userID] = await knex
+      .from<UserDTO>('users')
+      .update(user)
+      .where({ userID: id })
+      .returning('userID');
+
+    if (!userID) return null;
+
+    return userID;
   }
 }
