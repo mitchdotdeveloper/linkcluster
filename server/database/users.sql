@@ -28,7 +28,8 @@ CREATE TABLE public.users (
     "userID" integer NOT NULL,
     username character varying(50) NOT NULL,
     password character varying(64) NOT NULL,
-    salt character varying(32) NOT NULL
+    salt character varying(32) NOT NULL,
+    "refreshToken" character varying(36) NOT NULL
 );
 
 
@@ -82,4 +83,3 @@ ALTER TABLE ONLY public.users
 --
 -- PostgreSQL database dump complete
 --
-

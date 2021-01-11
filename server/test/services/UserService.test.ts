@@ -24,7 +24,12 @@ describe('UserService Suite', () => {
     container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
       UserRepository
     >{
-      create: (_username: string, _password: string, _salt: string) =>
+      create: (
+        _username: string,
+        _password: string,
+        _salt: string,
+        _refreshToken: string
+      ) =>
         Promise.resolve<Pick<UserDTO, 'userID' | 'username'>>({
           userID: 16,
           username: 'username',
@@ -35,12 +40,18 @@ describe('UserService Suite', () => {
     );
 
     expect(
-      await userService.createUser('username', 'password', 'salt')
+      await userService.createUser(
+        'username',
+        'password',
+        'salt',
+        '1616967e-217d-4f31-a108-0335ec0d79d7'
+      )
     ).to.be.deep.equal(<OmitClassMethods<User>>{
       userID: 16,
       username: 'username',
       password: undefined,
       salt: undefined,
+      refreshToken: undefined,
     });
   });
 
@@ -48,14 +59,25 @@ describe('UserService Suite', () => {
     container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
       UserRepository
     >{
-      create: (_username: string, _password: string, _salt: string) =>
-        Promise.resolve(null),
+      create: (
+        _username: string,
+        _password: string,
+        _salt: string,
+        _refreshToken: string
+      ) => Promise.resolve(null),
     });
     const userService: UserService = container.get<UserService>(
       TYPES.UserService
     );
 
-    expect(await userService.createUser('username', '', 'salt')).to.be.null;
+    expect(
+      await userService.createUser(
+        'username',
+        '',
+        'salt',
+        '1616967e-217d-4f31-a108-0335ec0d79d7'
+      )
+    ).to.be.null;
   });
 
   test('getUser()    : gets user by given username', async () => {
@@ -71,6 +93,7 @@ describe('UserService Suite', () => {
               : 'usernameDoesNotExist',
           password: 'myPassword',
           salt: 'mySalt',
+          refreshToken: '1616967e-217d-4f31-a108-0335ec0d79d7',
         }),
     });
     const userService: UserService = container.get<UserService>(
@@ -84,6 +107,7 @@ describe('UserService Suite', () => {
       username: 'usernameExists',
       password: 'myPassword',
       salt: 'mySalt',
+      refreshToken: '1616967e-217d-4f31-a108-0335ec0d79d7',
     });
   });
 
@@ -127,5 +151,45 @@ describe('UserService Suite', () => {
     );
 
     expect(await userService.userExists('usernameDoesNotExist')).to.be.false;
+  });
+
+  test('updateUser() : update user with given userID', async () => {
+    container.bind<UserRepository>(TYPES.UserRepository).toConstantValue(<
+      UserRepository
+    >{
+      update: (_userObj: Partial<UserDTO>) =>
+        Promise.resolve<UserDTO['userID']>(1),
+    });
+    const userService: UserService = container.get<UserService>(
+      TYPES.UserService
+    );
+
+    expect(
+      await userService.updateUser({
+        userID: 1,
+        refreshToken: 'my-refresh-token',
+      })
+    ).to.be.deep.equal(<OmitClassMethods<User>>{
+      userID: 1,
+      username: undefined,
+      password: undefined,
+      salt: undefined,
+      refreshToken: undefined,
+    });
+  });
+
+  test("updateUser() : doesn't update user as userID was not available", async () => {
+    container
+      .bind<UserRepository>(TYPES.UserRepository)
+      .toConstantValue(<UserRepository>{});
+    const userService: UserService = container.get<UserService>(
+      TYPES.UserService
+    );
+
+    expect(
+      await userService.updateUser({
+        userID: (undefined as unknown) as number,
+      })
+    ).to.be.null;
   });
 });

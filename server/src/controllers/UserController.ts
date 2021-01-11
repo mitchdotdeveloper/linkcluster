@@ -3,7 +3,7 @@ import type { RegistrableController } from '../controllers/RegistrableController
 import { injectable, inject } from 'inversify';
 import TYPES from '../inversifyTypes';
 import type { UserService } from 'services/UserService';
-import { authenticate } from '../middlewares/authenticate';
+import { authenticateJWT } from '../middlewares/authenticate';
 
 @injectable()
 export class UserController implements RegistrableController {
@@ -15,7 +15,7 @@ export class UserController implements RegistrableController {
 
     app.use('/users', usersRouter);
 
-    usersRouter.get('/:username', authenticate, async (req, res) => {
+    usersRouter.get('/:username', authenticateJWT, async (req, res) => {
       const { username } = req.params;
 
       if (!username) return res.sendStatus(400);
@@ -24,7 +24,9 @@ export class UserController implements RegistrableController {
 
       if (!user) return res.sendStatus(404);
 
-      return res.status(200).send({ user: this.userService.scrub(user) });
+      res.status(200);
+
+      return res.send({ user: this.userService.scrub(user) });
     });
   }
 }

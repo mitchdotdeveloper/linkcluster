@@ -5,13 +5,17 @@ import { User } from '../models/UserModel';
 import { UserDTO, UserRepository } from '../repositories/UserRepository';
 
 export interface UserService {
+  toUser(userDTO: UserDTO): User;
+  toUserDTO(user: User): UserDTO;
   createUser(
     username: string,
     password: string,
-    salt: string
+    salt: string,
+    refreshToken: string
   ): Promise<User | null>;
   getUser(username: string): Promise<User | null>;
   userExists(username: string): Promise<boolean>;
+  updateUser(user: Partial<UserDTO>): Promise<User | null>;
   scrub(user: User): void;
 }
 
@@ -20,29 +24,37 @@ export class UserServiceImpl implements UserService {
   @inject(TYPES.UserRepository)
   private userRepository!: UserRepository;
 
-  private toUser(userDTO: UserDTO) {
+  public toUser(userDTO: UserDTO) {
     return new User(
       userDTO.userID,
       userDTO.username,
       userDTO.password,
-      userDTO.salt
+      userDTO.salt,
+      userDTO.refreshToken
     );
   }
 
-  private toUserDTO(user: User) {
+  public toUserDTO(user: User) {
     return {
       userID: user.getUserID(),
       username: user.getUsername(),
       password: user.getPassword(),
       salt: user.getSalt(),
+      refreshToken: user.getRefreshToken(),
     } as UserDTO;
   }
 
-  public async createUser(username: string, password: string, salt: string) {
+  public async createUser(
+    username: string,
+    password: string,
+    salt: string,
+    refreshToken: string
+  ) {
     const userWasCreated = await this.userRepository.create(
       username,
       password,
-      salt
+      salt,
+      refreshToken
     );
 
     if (!userWasCreated) return null;
@@ -62,10 +74,23 @@ export class UserServiceImpl implements UserService {
     return this.userRepository.exists(username);
   }
 
-  public scrub(user: User): Omit<UserDTO, 'password' | 'salt'> {
+  public async updateUser(user: Partial<UserDTO>) {
+    if (!user.userID) return null;
+
+    const userID = await this.userRepository.update(user);
+
+    if (!userID) return null;
+
+    return this.toUser({ userID } as UserDTO);
+  }
+
+  public scrub(
+    user: User
+  ): Omit<UserDTO, 'password' | 'salt' | 'refreshToken'> {
     return stripBlacklistedProperties(this.toUserDTO(user), [
       'password',
       'salt',
+      'refreshToken',
     ]);
   }
 }

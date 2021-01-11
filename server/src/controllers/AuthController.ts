@@ -4,6 +4,7 @@ import { inject, injectable } from 'inversify';
 import TYPES from '../inversifyTypes';
 import { AuthService } from '../services/AuthService';
 import { UserService } from '../services/UserService';
+import { authenticateJWTRefresh } from '../middlewares/authenticate';
 
 @injectable()
 export class AuthController implements RegistrableController {
@@ -35,19 +36,32 @@ export class AuthController implements RegistrableController {
         salt,
       } = await this.authService.hashAndSaltPassword(password);
 
+      const refreshToken = this.authService.generateRefreshToken();
+
       const user = await this.userService.createUser(
         username,
         hashedPassword,
-        salt
+        salt,
+        refreshToken
       );
 
       if (!user) return res.sendStatus(500);
 
-      return res.status(201).send({ username: user.getUsername() });
+      const jwt = this.authService.signJWT(user.getUsername());
+
+      res.setHeader('Authorization', `Bearer ${jwt}`);
+      res.cookie('refreshtoken', refreshToken, {
+        httpOnly: true,
+        secure: false,
+        maxAge: 1000 * 60 * 1440,
+      });
+      res.status(201);
+
+      return res.send(this.userService.scrub(user));
     });
 
     authRouter.post('/login', async (req, res) => {
-      const { session, body } = req;
+      const { body } = req;
       const { username, password } = body as {
         username: string;
         password: string;
@@ -66,21 +80,60 @@ export class AuthController implements RegistrableController {
 
       if (hashedPassword !== user.getPassword()) return res.sendStatus(403);
 
-      if (session) session.loggedIn = true;
-      return res.status(200).send(this.userService.scrub(user));
+      const jwt = this.authService.signJWT(user.getUsername());
+
+      res.setHeader('Authorization', `Bearer ${jwt}`);
+      res.cookie('refreshtoken', user.getRefreshToken(), {
+        httpOnly: true,
+        secure: false,
+        maxAge: 1000 * 60 * 1440,
+      });
+      res.status(200);
+
+      return res.send(this.userService.scrub(user));
     });
 
     authRouter.delete('/logout', async (req, res) => {
-      const { session, sessionID } = req;
-      if (!session || !sessionID) return res.sendStatus(400);
+      const { userID } = req.body as { userID: number };
 
-      session.loggedIn = false;
-      session.destroy((err) => {
-        if (err) return res.sendStatus(500);
+      if (!userID) return res.sendStatus(400);
 
-        res.clearCookie('sessionId');
-        res.sendStatus(200);
-      });
+      const refreshToken = this.authService.generateRefreshToken();
+
+      const user = await this.userService.updateUser({ userID, refreshToken });
+
+      if (!user) return res.sendStatus(500);
+
+      res.sendStatus(204);
+    });
+
+    authRouter.post('/refresh', authenticateJWTRefresh, async (req, res) => {
+      const { username } = req.body as { username: string };
+      const refreshToken = req.headers.cookie?.slice(13);
+
+      if (!username) return res.sendStatus(400);
+
+      const user = await this.userService.getUser(username);
+
+      if (!user) return res.sendStatus(500);
+
+      if (user.getRefreshToken() !== refreshToken) {
+        user.setRefreshToken(this.authService.generateRefreshToken());
+
+        await this.userService.updateUser(this.userService.toUserDTO(user));
+
+        res.clearCookie('refreshtoken', { httpOnly: true, secure: false });
+
+        return res.sendStatus(403);
+      }
+
+      const jwt = this.authService.signJWT(username);
+
+      if (!jwt) return res.sendStatus(500);
+
+      res.status(201);
+
+      return res.send({ jwt });
     });
   }
 }
