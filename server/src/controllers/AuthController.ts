@@ -93,14 +93,17 @@ export class AuthController implements RegistrableController {
       return res.send(this.userService.scrub(user));
     });
 
-    authRouter.delete('/logout', async (req, res) => {
-      const { userID } = req.body as { userID: number };
+    authRouter.delete('/logout/:userID', async (req, res) => {
+      const { userID } = req.params;
 
       if (!userID) return res.sendStatus(400);
 
       const refreshToken = this.authService.generateRefreshToken();
 
-      const user = await this.userService.updateUser({ userID, refreshToken });
+      const user = await this.userService.updateUser({
+        userID: Number(userID),
+        refreshToken,
+      });
 
       if (!user) return res.sendStatus(500);
 

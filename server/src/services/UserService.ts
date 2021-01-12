@@ -16,7 +16,7 @@ export interface UserService {
   getUser(username: string): Promise<User | null>;
   userExists(username: string): Promise<boolean>;
   updateUser(user: Partial<UserDTO>): Promise<User | null>;
-  scrub(user: User): void;
+  scrub(user: User): Omit<UserDTO, 'password' | 'salt' | 'refreshToken'>;
 }
 
 @injectable()
