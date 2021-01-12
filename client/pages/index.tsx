@@ -1,9 +1,5 @@
-import { Hi } from 'components/Hi/Hi';
+import { App } from 'modules/App/App';
 
-const Index = () => (
-  <div>
-    <Hi message="My name is Mitch!" />
-  </div>
-);
+const Index = () => <App />;
 
 export default Index;

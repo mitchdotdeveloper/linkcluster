@@ -1,9 +1,0 @@
-// Jest Snapshot v1, https://goo.gl/fbAQLP
-
-exports[`test renders 1`] = `
-<DocumentFragment>
-  <h1>
-    Hi! My name is Mitch!
-  </h1>
-</DocumentFragment>
-`;
