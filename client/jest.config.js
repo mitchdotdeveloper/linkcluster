@@ -7,7 +7,7 @@ module.exports = {
     '^.+\\.(ts|tsx)$': 'babel-jest',
   },
   moduleNameMapper: {
-    'components/(.*)': '<rootDir>/src/components/$1',
+    '^modules/(.*)': '<rootDir>/src/modules/$1',
   },
   transformIgnorePatterns: ['node_modules/'],
 };
