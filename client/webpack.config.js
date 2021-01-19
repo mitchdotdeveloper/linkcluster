@@ -1,4 +1,5 @@
 const ForkTsCheckerWebpackPlugin = require('fork-ts-checker-webpack-plugin');
+const DotEnvWebpackPlugin = require('dotenv-webpack');
 const path = require('path');
 
 const srcPath = path.resolve(__dirname, 'src');
@@ -13,6 +14,7 @@ module.exports = {
   entry: srcPath,
   output: {
     path: distPath,
+    publicPath: '/',
   },
   module: {
     rules: [
@@ -26,7 +28,7 @@ module.exports = {
       },
     ],
   },
-  plugins: [new ForkTsCheckerWebpackPlugin()],
+  plugins: [new ForkTsCheckerWebpackPlugin(), new DotEnvWebpackPlugin()],
   devtool: 'source-map',
   devServer: {
     host: 'localhost',

@@ -100,5 +100,6 @@ export type Auth = {
 };
 
 export type AuthStore = Auth & {
+  isAuthenticated: boolean;
   error: Error | null;
 };

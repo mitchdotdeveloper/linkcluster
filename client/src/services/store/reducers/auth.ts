@@ -17,6 +17,7 @@ import { AuthActionTypes, AuthStore } from 'types/services/store/auth';
 
 const initialState: AuthStore = {
   jwt: '',
+  isAuthenticated: false,
   error: null,
 };
 
@@ -33,8 +34,9 @@ export const Auth = (state = initialState, action: AuthActionTypes) =>
       case POST_LOGIN_SUCCESS:
       case POST_REFRESH_SUCCESS: {
         const { jwt } = action.payload;
-        console.log(jwt);
+
         draft.jwt = jwt;
+        draft.isAuthenticated = true;
         draft.error = null;
 
         break;
@@ -48,6 +50,7 @@ export const Auth = (state = initialState, action: AuthActionTypes) =>
       case POST_REFRESH_FAILURE: {
         const { error } = action.payload;
 
+        draft.isAuthenticated = false;
         draft.error = error;
 
         break;

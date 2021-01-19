@@ -1,11 +1,17 @@
-import React from 'react';
+import { MainRouter } from 'modules/routes/MainRouter';
+import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
+import { BrowserRouter } from 'react-router-dom';
 import { store } from 'services/store/store';
 
 ReactDOM.render(
-  <Provider store={store}>
-    <h1>hi</h1>
-  </Provider>,
+  <StrictMode>
+    <Provider store={store}>
+      <BrowserRouter basename={process.env.ROUTER_BASE_NAME}>
+        <MainRouter />
+      </BrowserRouter>
+    </Provider>
+  </StrictMode>,
   document.getElementById('root')
 );
