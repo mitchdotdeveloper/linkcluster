@@ -1,0 +1,13 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`MainRouter Suite Renders /auth route 1`] = `
+<DocumentFragment>
+  /auth/login
+</DocumentFragment>
+`;
+
+exports[`MainRouter Suite Renders /user route 1`] = `
+<DocumentFragment>
+  username
+</DocumentFragment>
+`;

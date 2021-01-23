@@ -1,7 +1,7 @@
 import React, { FC } from 'react';
 import { Route, Switch } from 'react-router-dom';
-import { AuthRouter } from './AuthRouter/AuthRouter';
-import { UserRouter } from './UserRouter/UserRouter';
+import { AuthRouter } from '../AuthRouter/AuthRouter';
+import { UserRouter } from '../UserRouter/UserRouter';
 import { ProtectedRoute } from 'modules/helpers/ProtectedRoute/ProtectedRoute';
 
 export type MainRouterProps = {};

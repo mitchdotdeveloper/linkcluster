@@ -11,7 +11,9 @@ export const AuthRouter: FC<AuthRouterProps> = () => {
       <Route exact path={path}>
         <Redirect to={`${url}/login`} />
       </Route>
-      <Route path={`${path}/login`}>/auth/login</Route>
+      <Route exact path={`${path}/login`}>
+        /auth/login
+      </Route>
     </Switch>
   );
 };

@@ -16,7 +16,9 @@ export const UserRouter: FC<UserRouterProps> = () => {
       <Route exact path={path}>
         <Redirect to={{ pathname: `${path}/${username}` }} />
       </Route>
-      <Route path={`${path}/${username}`}>{username}</Route>
+      <Route exact path={`${path}/${username}`}>
+        {username}
+      </Route>
     </Switch>
   );
 };

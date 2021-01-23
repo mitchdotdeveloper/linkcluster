@@ -1,4 +1,4 @@
-import { MainRouter } from 'modules/routes/MainRouter';
+import { MainRouter } from 'modules/routes/MainRouter/MainRouter';
 import React, { StrictMode } from 'react';
 import ReactDOM from 'react-dom';
 import { Provider } from 'react-redux';
