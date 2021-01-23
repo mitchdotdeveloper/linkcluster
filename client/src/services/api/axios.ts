@@ -2,7 +2,7 @@ import Axios from 'axios';
 import { store } from 'services/store/store';
 
 const axiosInstance = Axios.create({
-  baseURL: 'http://localhost:3000',
+  baseURL: process.env.API_HOST_NAME,
   headers: {
     'Content-Type': 'application/json',
   },
